@@ -199,6 +199,7 @@ function printApplication(a: Application) {
 
 function LoginForm({ onLogin }: { onLogin: () => void }) {
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -225,13 +226,23 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
         <h1 className="text-2xl font-bold text-gray-800 mb-2">Admin Login</h1>
         <p className="text-gray-500 text-sm mb-6">Blue Blaze Estates Dashboard</p>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 pr-16 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((s) => !s)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              className="absolute inset-y-0 right-0 px-4 text-sm font-medium text-gray-500 hover:text-gray-800"
+            >
+              {showPassword ? "Hide" : "Show"}
+            </button>
+          </div>
           {error && <p className="text-red-500 text-sm">{error}</p>}
           <button
             type="submit"

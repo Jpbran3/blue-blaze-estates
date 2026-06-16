@@ -9,7 +9,7 @@ function hashPassword(password: string) {
 async function isAuthenticated() {
   const cookieStore = await cookies();
   const session = cookieStore.get("admin_session");
-  const adminPassword = process.env.ADMIN_PASSWORD ?? "changeme";
+  const adminPassword = (process.env.ADMIN_PASSWORD ?? "changeme").trim();
   return session?.value === hashPassword(adminPassword);
 }
 
@@ -23,9 +23,9 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   const { password } = await request.json();
-  const adminPassword = process.env.ADMIN_PASSWORD ?? "changeme";
+  const adminPassword = (process.env.ADMIN_PASSWORD ?? "changeme").trim();
 
-  if (password !== adminPassword) {
+  if ((password ?? "").trim() !== adminPassword) {
     return NextResponse.json({ error: "Invalid password" }, { status: 401 });
   }
 

@@ -519,12 +519,29 @@ function CitiesTab() {
     <div>
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold text-gray-800">Cities</h2>
-        <button
-          onClick={openAdd}
-          className="bg-blue-900 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800 transition-colors"
-        >
-          + Add City
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={async () => {
+              const res = await fetch("/api/admin/setup-db", { method: "POST" });
+              const data = await res.json().catch(() => null);
+              if (res.ok) {
+                alert(`Database ready. Tables: ${(data?.tables ?? []).join(", ")}`);
+                load();
+              } else {
+                alert(`Setup failed: ${data?.error ?? res.status}`);
+              }
+            }}
+            className="bg-gray-100 text-gray-600 px-4 py-2 rounded-lg text-sm hover:bg-gray-200 transition-colors"
+          >
+            Set up database
+          </button>
+          <button
+            onClick={openAdd}
+            className="bg-blue-900 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800 transition-colors"
+          >
+            + Add City
+          </button>
+        </div>
       </div>
 
       {showForm && (

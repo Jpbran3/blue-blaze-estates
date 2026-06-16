@@ -5,7 +5,9 @@ import Image from "next/image";
 import Link from "next/link";
 
 const heroImages = [
-  "/images/blue-blaze-mobile-home-park.jpg",
+  "/images/park-1.jpg",
+  "/images/park-2.jpg",
+  "/images/park-3.jpg",
 ];
 
 export default function HeroCarousel() {

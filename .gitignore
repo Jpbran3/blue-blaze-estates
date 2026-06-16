@@ -53,3 +53,14 @@ node_modules
 .env
 .env.local
 *.db
+
+# legacy RJLU template images (unused)
+public/images/carrollton-apartments.png
+public/images/east-alton-apartments.webp
+public/images/east-alton-mobile-homes.jfif
+public/images/east-alton-mobile-homes.jpg
+
+# stray photo uploads dropped in repo root (real copies live in public/images)
+/B7 Picture.png
+/C5 Picture.png
+/Screenshot 2026-06-11 113346.png

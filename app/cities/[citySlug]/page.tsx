@@ -65,7 +65,7 @@ export default async function CityPage({ params }: Props) {
 
         {/* Header */}
         <div className="mb-10">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">
+          <h1 className="font-display text-3xl md:text-4xl font-bold text-gray-900 mb-2">
             {city.name}
           </h1>
           <p className="text-gray-500">
@@ -77,7 +77,20 @@ export default async function CityPage({ params }: Props) {
         {/* Listings */}
         {city.listings.length === 0 ? (
           <div className="text-center py-20 text-gray-500">
-            <div className="text-5xl mb-4">🏠</div>
+            <svg
+              className="mx-auto mb-4 h-14 w-14 text-gray-300"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.5}
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"
+              />
+            </svg>
             <h2 className="text-xl font-semibold text-gray-700 mb-2">
               No Units Currently Available
             </h2>

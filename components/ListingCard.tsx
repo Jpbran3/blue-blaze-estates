@@ -64,8 +64,8 @@ export default function ListingCard({
             <button
               type="button"
               onClick={() => openLightbox(0)}
-              className="w-full h-full block focus:outline-none"
-              aria-label="View photos"
+              className="w-full h-full block cursor-pointer"
+              aria-label={`View photos of ${title}`}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -130,12 +130,15 @@ export default function ListingCard({
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
           onClick={() => setLightboxOpen(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Photo gallery for ${title}`}
         >
           {/* Close */}
           <button
             type="button"
             onClick={() => setLightboxOpen(false)}
-            className="absolute top-4 right-4 text-white/80 hover:text-white text-3xl leading-none z-10"
+            className="absolute top-3 right-3 flex h-11 w-11 items-center justify-center rounded-full text-white/80 hover:text-white hover:bg-white/10 text-3xl leading-none z-10 cursor-pointer transition-colors"
             aria-label="Close"
           >
             ×
@@ -153,8 +156,8 @@ export default function ListingCard({
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); prev(); }}
-              className="absolute left-4 text-white/80 hover:text-white text-4xl leading-none z-10 p-2"
-              aria-label="Previous"
+              className="absolute left-2 sm:left-4 flex h-11 w-11 items-center justify-center rounded-full text-white/80 hover:text-white hover:bg-white/10 text-4xl leading-none z-10 cursor-pointer transition-colors"
+              aria-label="Previous photo"
             >
               ‹
             </button>
@@ -178,8 +181,8 @@ export default function ListingCard({
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); next(); }}
-              className="absolute right-4 text-white/80 hover:text-white text-4xl leading-none z-10 p-2"
-              aria-label="Next"
+              className="absolute right-2 sm:right-4 flex h-11 w-11 items-center justify-center rounded-full text-white/80 hover:text-white hover:bg-white/10 text-4xl leading-none z-10 cursor-pointer transition-colors"
+              aria-label="Next photo"
             >
               ›
             </button>
@@ -196,7 +199,8 @@ export default function ListingCard({
                   key={i}
                   type="button"
                   onClick={() => setActiveIndex(i)}
-                  className={`w-12 h-12 rounded overflow-hidden border-2 transition-all ${
+                  aria-label={`View photo ${i + 1}`}
+                  className={`w-12 h-12 rounded overflow-hidden border-2 transition-all cursor-pointer ${
                     i === activeIndex ? "border-white scale-110" : "border-white/30 opacity-60 hover:opacity-100"
                   }`}
                 >

@@ -47,7 +47,7 @@ export default function Header() {
               B
             </text>
           </svg>
-          <span className="text-xl font-bold tracking-tight group-hover:text-blue-200 transition-colors">
+          <span className="font-display text-xl font-bold tracking-tight group-hover:text-blue-200 transition-colors">
             Blue Blaze Estates
           </span>
         </Link>
@@ -67,9 +67,10 @@ export default function Header() {
 
         {/* Mobile Hamburger */}
         <button
-          className="md:hidden p-2 rounded-md hover:bg-blue-800 transition-colors"
+          className="md:hidden flex items-center justify-center h-11 w-11 -mr-2 rounded-md hover:bg-blue-800 transition-colors cursor-pointer"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Toggle menu"
+          aria-expanded={menuOpen}
         >
           <svg
             width="24"

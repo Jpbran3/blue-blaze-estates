@@ -43,7 +43,7 @@ export default function Footer() {
                   B
                 </text>
               </svg>
-              <span className="text-lg font-bold">Blue Blaze Estates</span>
+              <span className="font-display text-lg font-bold">Blue Blaze Estates</span>
             </div>
             <p className="text-blue-200 text-sm leading-relaxed">
               Quality rentals in the Southern Illinois area with a focus on providing quiet living.
@@ -52,10 +52,10 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="font-semibold mb-3 text-sm uppercase tracking-wider text-gray-400">
+            <h3 className="font-semibold mb-3 text-sm uppercase tracking-wider text-blue-300">
               Quick Links
             </h3>
-            <ul className="space-y-2 text-sm text-gray-400">
+            <ul className="space-y-2 text-sm text-blue-200">
               <li>
                 <Link href="/" className="hover:text-white transition-colors">
                   Home
@@ -71,10 +71,10 @@ export default function Footer() {
 
           {/* Contact */}
           <div>
-            <h3 className="font-semibold mb-3 text-sm uppercase tracking-wider text-gray-400">
+            <h3 className="font-semibold mb-3 text-sm uppercase tracking-wider text-blue-300">
               Contact Us
             </h3>
-            <ul className="space-y-2 text-sm text-gray-400">
+            <ul className="space-y-2 text-sm text-blue-200">
               <li className="flex items-center gap-2">
                 <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
@@ -95,7 +95,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-gray-800 mt-8 pt-6 text-center text-sm text-gray-500">
+        <div className="border-t border-blue-800 mt-8 pt-6 text-center text-sm text-blue-300">
           © {new Date().getFullYear()} Blue Blaze Estates. All rights reserved.
         </div>
       </div>

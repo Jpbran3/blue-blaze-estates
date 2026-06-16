@@ -85,10 +85,12 @@ function Field({
 }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">
-        {label} {required && <span className="text-red-500">*</span>}
+      <label className="block text-sm font-medium text-gray-700">
+        <span className="mb-1 inline-block">
+          {label} {required && <span className="text-red-500">*</span>}
+        </span>
+        <span className="block font-normal">{children}</span>
       </label>
-      {children}
       {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
     </div>
   );
@@ -177,7 +179,7 @@ function ApplyForm() {
   if (status === "success") {
     return (
       <div className="text-center py-12">
-        <h2 className="text-2xl font-bold text-gray-800 mb-3">
+        <h2 className="font-display text-2xl md:text-3xl font-bold text-gray-900 mb-3">
           Application Submitted!
         </h2>
         <p className="text-gray-600 mb-6 max-w-md mx-auto">
@@ -342,10 +344,22 @@ function ApplyForm() {
         <button
           type="button"
           onClick={() => setSpouseOpen(!spouseOpen)}
-          className="w-full flex justify-between items-center px-4 py-3 bg-gray-50 text-left text-sm font-semibold text-gray-700 hover:bg-blue-100 transition-colors"
+          aria-expanded={spouseOpen}
+          className="w-full flex justify-between items-center px-4 py-3 bg-gray-50 text-left text-sm font-semibold text-gray-700 hover:bg-blue-100 transition-colors cursor-pointer"
         >
           <span>Spouse Information (optional)</span>
-          <span className="text-gray-400 text-xs">{spouseOpen ? "▲" : "▼"}</span>
+          <svg
+            className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${
+              spouseOpen ? "rotate-180" : ""
+            }`}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
         </button>
         {spouseOpen && (
           <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -664,7 +678,7 @@ export default function ApplyPage() {
           </Link>
         </div>
         <div className="bg-white rounded-2xl shadow-md p-8 md:p-10">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+          <h1 className="font-display text-3xl md:text-4xl font-bold text-gray-900 mb-2">
             Rental Application
           </h1>
           <p className="text-gray-500 mb-8">

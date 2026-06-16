@@ -1,8 +1,18 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-playfair",
+});
 
 export const metadata: Metadata = {
   title: "Blue Blaze Estates — Quality Rentals in Southern Illinois",
@@ -25,7 +35,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full">
-      <body className={`${inter.className} min-h-full flex flex-col bg-gray-50 text-gray-800`}>
+      <body
+        className={`${inter.variable} ${playfair.variable} min-h-full flex flex-col bg-gray-50 text-gray-800 antialiased`}
+      >
         {children}
       </body>
     </html>

@@ -673,8 +673,21 @@ export default function ApplyPage() {
       <Header />
       <main className="max-w-3xl mx-auto px-6 py-12">
         <div className="mb-8">
-          <Link href="/" className="text-sm text-gray-600 hover:text-gray-900">
-            ← Back to Home
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+          >
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            Back to Home
           </Link>
         </div>
         <div className="bg-white rounded-2xl shadow-md p-8 md:p-10">

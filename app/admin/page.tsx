@@ -223,22 +223,27 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="bg-white rounded-2xl shadow-lg p-10 w-full max-w-sm">
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">Admin Login</h1>
+        <h1 className="font-display text-2xl font-bold text-gray-900 mb-2">Admin Login</h1>
         <p className="text-gray-500 text-sm mb-6">Blue Blaze Estates Dashboard</p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="relative">
+            <label htmlFor="admin-password" className="sr-only">
+              Password
+            </label>
             <input
+              id="admin-password"
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
+              autoComplete="current-password"
               className="w-full border border-gray-300 rounded-lg px-4 py-3 pr-16 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button
               type="button"
               onClick={() => setShowPassword((s) => !s)}
               aria-label={showPassword ? "Hide password" : "Show password"}
-              className="absolute inset-y-0 right-0 px-4 text-sm font-medium text-gray-500 hover:text-gray-800"
+              className="absolute inset-y-0 right-0 px-4 text-sm font-medium text-gray-500 hover:text-gray-800 cursor-pointer"
             >
               {showPassword ? "Hide" : "Show"}
             </button>
@@ -247,7 +252,7 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-900 hover:bg-blue-800 disabled:bg-gray-400 text-white font-semibold py-3 rounded-lg transition-colors duration-200"
+            className="w-full bg-blue-900 hover:bg-blue-800 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg transition-colors duration-200 cursor-pointer"
           >
             {loading ? "Checking..." : "Sign In"}
           </button>
@@ -330,7 +335,8 @@ function MultiImageUploader({
               <button
                 type="button"
                 onClick={() => remove(i)}
-                className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                aria-label={`Remove image ${i + 1}`}
+                className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity cursor-pointer"
               >
                 ×
               </button>
@@ -1593,10 +1599,10 @@ function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-blue-900 text-white px-6 py-4 flex justify-between items-center">
-        <h1 className="text-xl font-bold">Blue Blaze Estates — Admin</h1>
+        <h1 className="font-display text-xl font-bold">Blue Blaze Estates — Admin</h1>
         <button
           onClick={logout}
-          className="text-gray-300 hover:text-white text-sm transition-colors"
+          className="text-blue-100 hover:text-white text-sm transition-colors cursor-pointer"
         >
           Sign Out
         </button>
@@ -1609,9 +1615,10 @@ function Dashboard() {
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`px-6 py-3 text-sm font-medium capitalize transition-colors border-b-2 -mb-px ${
+              aria-current={tab === t ? "page" : undefined}
+              className={`px-6 py-3 text-sm font-medium capitalize transition-colors border-b-2 -mb-px cursor-pointer ${
                 tab === t
-                  ? "border-black text-blue-900"
+                  ? "border-blue-900 text-blue-900"
                   : "border-transparent text-gray-500 hover:text-gray-700"
               }`}
             >

@@ -415,15 +415,25 @@ function ImageUploader({
 
 // ── Cities Tab ─────────────────────────────────────────────────────────────────
 
+function slugify(value: string): string {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 function CitiesTab() {
   const [cities, setCities] = useState<City[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editCity, setEditCity] = useState<City | null>(null);
   const [form, setForm] = useState({ name: "", state: "IL", slug: "", imageUrl: "" });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const res = await fetch("/api/cities");
-    setCities(await res.json());
+    if (res.ok) setCities(await res.json());
   }, []);
 
   useEffect(() => { load(); }, [load]);
@@ -431,32 +441,66 @@ function CitiesTab() {
   function openAdd() {
     setEditCity(null);
     setForm({ name: "", state: "IL", slug: "", imageUrl: "" });
+    setError(null);
     setShowForm(true);
   }
 
   function openEdit(c: City) {
     setEditCity(c);
     setForm({ name: c.name, state: c.state, slug: c.slug, imageUrl: c.imageUrl ?? "" });
+    setError(null);
     setShowForm(true);
   }
 
   async function save() {
-    const body = { ...form, imageUrl: form.imageUrl || null };
-    if (editCity) {
-      await fetch(`/api/cities/${editCity.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-    } else {
-      await fetch("/api/cities", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
+    setError(null);
+    // Derive a slug from the name if the user left it blank.
+    const slug = form.slug.trim() || slugify(form.name);
+    const name = form.name.trim();
+    const state = form.state.trim();
+    if (!name || !state) {
+      setError("Name and state are required.");
+      return;
     }
-    setShowForm(false);
-    load();
+    if (!slug) {
+      setError("Could not generate a slug — please enter one manually.");
+      return;
+    }
+
+    const body = { name, state, slug, imageUrl: form.imageUrl || null };
+    setSaving(true);
+    try {
+      const res = editCity
+        ? await fetch(`/api/cities/${editCity.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          })
+        : await fetch("/api/cities", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          });
+
+      if (!res.ok) {
+        let message = `Save failed (${res.status}).`;
+        if (res.status === 401) {
+          message = "Your session expired. Please sign out and sign back in.";
+        } else {
+          const data = await res.json().catch(() => null);
+          if (data?.error) message = data.error;
+        }
+        setError(message);
+        return;
+      }
+
+      setShowForm(false);
+      load();
+    } catch {
+      setError("Network error — please try again.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function del(id: string) {
@@ -487,7 +531,19 @@ function CitiesTab() {
               <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
               <input
                 value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                onChange={(e) => {
+                  const name = e.target.value;
+                  setForm((prev) => ({
+                    ...prev,
+                    name,
+                    // Auto-fill slug from the name unless the user has typed
+                    // their own slug (or is editing an existing city).
+                    slug:
+                      !editCity && prev.slug === slugify(prev.name)
+                        ? slugify(name)
+                        : prev.slug,
+                  }));
+                }}
                 placeholder="Edwardsville"
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -502,7 +558,10 @@ function CitiesTab() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Slug</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Slug{" "}
+                <span className="text-gray-400 font-normal">— auto-filled</span>
+              </label>
               <input
                 value={form.slug}
                 onChange={(e) => setForm({ ...form, slug: e.target.value })}
@@ -515,12 +574,18 @@ function CitiesTab() {
             current={form.imageUrl}
             onChange={(url) => setForm({ ...form, imageUrl: url })}
           />
+          {error && (
+            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+              {error}
+            </p>
+          )}
           <div className="flex gap-2">
             <button
               onClick={save}
-              className="bg-blue-900 text-white px-5 py-2 rounded-lg text-sm hover:bg-blue-800 transition-colors"
+              disabled={saving}
+              className="bg-blue-900 text-white px-5 py-2 rounded-lg text-sm hover:bg-blue-800 disabled:bg-gray-400 transition-colors"
             >
-              Save
+              {saving ? "Saving…" : "Save"}
             </button>
             <button
               onClick={() => setShowForm(false)}

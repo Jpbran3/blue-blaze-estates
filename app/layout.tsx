@@ -20,6 +20,7 @@ export const metadata: Metadata = {
     "Quality rentals in the Southern Illinois area with a focus on providing quiet living. Now leasing at Blue Blaze Mobile Home Park in Herrin, IL.",
   icons: {
     icon: [
+      { url: "/logo.svg", type: "image/svg+xml" },
       { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
       { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
       { url: "/favicon.ico", sizes: "any" },

@@ -8,22 +8,29 @@ import Link from "next/link";
 export const revalidate = 60;
 
 async function getCities() {
-  const cities = await prisma.city.findMany({
-    include: {
-      _count: {
-        select: { listings: { where: { status: "available" } } },
+  try {
+    const cities = await prisma.city.findMany({
+      include: {
+        _count: {
+          select: { listings: { where: { status: "available" } } },
+        },
       },
-    },
-    orderBy: { name: "asc" },
-  });
-  return cities.map((c) => ({
-    id: c.id,
-    name: c.name,
-    state: c.state,
-    slug: c.slug,
-    imageUrl: c.imageUrl,
-    availableCount: c._count.listings,
-  }));
+      orderBy: { name: "asc" },
+    });
+    return cities.map((c) => ({
+      id: c.id,
+      name: c.name,
+      state: c.state,
+      slug: c.slug,
+      imageUrl: c.imageUrl,
+      availableCount: c._count.listings,
+    }));
+  } catch (err) {
+    // DB may be empty/unmigrated at build time (e.g. fresh Turso). Render an
+    // empty list rather than failing the prerender; ISR will refill it.
+    console.error("getCities failed, returning empty list:", err);
+    return [];
+  }
 }
 
 export default async function HomePage() {

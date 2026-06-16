@@ -12,20 +12,31 @@ interface Props {
 }
 
 async function getCity(slug: string) {
-  return prisma.city.findUnique({
-    where: { slug },
-    include: {
-      listings: {
-        where: { status: "available" },
-        orderBy: { createdAt: "desc" },
+  try {
+    return await prisma.city.findUnique({
+      where: { slug },
+      include: {
+        listings: {
+          where: { status: "available" },
+          orderBy: { createdAt: "desc" },
+        },
       },
-    },
-  });
+    });
+  } catch (err) {
+    // DB may be empty/unmigrated (e.g. fresh Turso). Treat as not found.
+    console.error("getCity failed, treating as not found:", err);
+    return null;
+  }
 }
 
 export async function generateMetadata({ params }: Props) {
   const { citySlug } = await params;
-  const city = await prisma.city.findUnique({ where: { slug: citySlug } });
+  let city = null;
+  try {
+    city = await prisma.city.findUnique({ where: { slug: citySlug } });
+  } catch (err) {
+    console.error("generateMetadata city lookup failed:", err);
+  }
   if (!city) return { title: "City Not Found" };
   return {
     title: `${city.name} — Blue Blaze Estates`,

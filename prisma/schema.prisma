@@ -1,0 +1,90 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model City {
+  id        String    @id @default(cuid())
+  name      String
+  state     String
+  slug      String    @unique
+  imageUrl  String?
+  listings  Listing[]
+  createdAt DateTime  @default(now())
+}
+
+model Listing {
+  id           String        @id @default(cuid())
+  cityId       String
+  city         City          @relation(fields: [cityId], references: [id])
+  title        String
+  description  String?
+  bedrooms     Int
+  bathrooms    Int
+  rentPrice    Int
+  imageUrl     String?
+  images       String?
+  status       String        @default("available")
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  applications Application[]
+}
+
+model Application {
+  id                         String   @id @default(cuid())
+  applicantName              String   @map("fullName")
+  presentAddress             String?
+  townStateZip               String?
+  phone                      String
+  ssn                        String?
+  driversLicense             String?
+  birthDate                  String?
+  employer                   String?
+  employerAddress            String?
+  employerTownStateZip       String?
+  employerPhone              String?
+  employmentDuration         String?
+  monthlyWages               String?
+  previousEmployer           String?
+  spouseName                 String?
+  spouseDriversLicense       String?
+  spouseBirthDate            String?
+  spouseSsn                  String?
+  spouseEmployer             String?
+  spouseEmployerAddress      String?
+  spouseEmployerTownStateZip String?
+  spouseEmployerPhone        String?
+  spouseEmploymentDuration   String?
+  spouseMonthlyWages         String?
+  spousePreviousEmployer     String?
+  childrenResiding           String?
+  adultsResiding             String?
+  currentLandlord            String?
+  currentLandlordPhone       String?
+  currentTenancyDuration     String?
+  currentRentAmount          String?
+  previousLandlord           String?
+  previousLandlordPhone      String?
+  previousAddressRented      String?
+  previousRentAmount         String?
+  felonyHistory              String?
+  interest                   String?
+  electronicSignature        String?
+  signatureDate              String?
+  email                      String?
+  listingId                  String?
+  listing                    Listing? @relation(fields: [listingId], references: [id], onDelete: SetNull)
+  rentPrice                  Float?
+  status                     String   @default("new")
+  aiScore                    Int?
+  aiSummary                  String?
+  archived                   Boolean  @default(false)
+  createdAt                  DateTime @default(now())
+}

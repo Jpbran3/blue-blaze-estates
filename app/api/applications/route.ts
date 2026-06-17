@@ -31,9 +31,36 @@ export async function GET(request: NextRequest) {
   return NextResponse.json(applications);
 }
 
+// Transient libSQL/Turso errors (a reused HTTP connection can go stale between
+// serverless invocations). Retrying the same op once almost always succeeds.
+const RETRYABLE_DB_ERROR =
+  /stream not found|connection|timed? ?out|reset|ECONN|closed|unavailable|hyper|broken pipe|EPIPE/i;
+
+async function withDbRetry<T>(fn: () => Promise<T>, label: string): Promise<T> {
+  try {
+    return await fn();
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (RETRYABLE_DB_ERROR.test(msg)) {
+      console.error(`${label} hit a transient DB error — retrying once:`, msg);
+      await new Promise((r) => setTimeout(r, 300));
+      return await fn();
+    }
+    throw err;
+  }
+}
+
 export async function POST(request: NextRequest) {
-  const body = await request.json();
-  const { applicantName, phone, listingId } = body;
+  let body: Record<string, unknown>;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+  }
+
+  const applicantName = body.applicantName as string | undefined;
+  const phone = body.phone as string | undefined;
+  const listingId = (body.listingId as string | null | undefined) ?? null;
 
   if (!applicantName || !phone) {
     return NextResponse.json(
@@ -42,70 +69,104 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const listing = listingId
-    ? await prisma.listing.findUnique({ where: { id: listingId } })
-    : null;
-  const rentPrice = listing?.rentPrice ?? null;
-
-  const application = await prisma.application.create({
-    data: {
-      applicantName,
-      phone,
-      listingId: listingId ?? null,
-      rentPrice,
-      presentAddress: body.presentAddress ?? null,
-      townStateZip: body.townStateZip ?? null,
-      ssn: body.ssn ?? null,
-      driversLicense: body.driversLicense ?? null,
-      birthDate: body.birthDate ?? null,
-      employer: body.employer ?? null,
-      employerAddress: body.employerAddress ?? null,
-      employerTownStateZip: body.employerTownStateZip ?? null,
-      employerPhone: body.employerPhone ?? null,
-      employmentDuration: body.employmentDuration ?? null,
-      monthlyWages: body.monthlyWages ?? null,
-      previousEmployer: body.previousEmployer ?? null,
-      spouseName: body.spouseName ?? null,
-      spouseDriversLicense: body.spouseDriversLicense ?? null,
-      spouseBirthDate: body.spouseBirthDate ?? null,
-      spouseSsn: body.spouseSsn ?? null,
-      spouseEmployer: body.spouseEmployer ?? null,
-      spouseEmployerAddress: body.spouseEmployerAddress ?? null,
-      spouseEmployerTownStateZip: body.spouseEmployerTownStateZip ?? null,
-      spouseEmployerPhone: body.spouseEmployerPhone ?? null,
-      spouseEmploymentDuration: body.spouseEmploymentDuration ?? null,
-      spouseMonthlyWages: body.spouseMonthlyWages ?? null,
-      spousePreviousEmployer: body.spousePreviousEmployer ?? null,
-      childrenResiding: body.childrenResiding ?? null,
-      adultsResiding: body.adultsResiding ?? null,
-      currentLandlord: body.currentLandlord ?? null,
-      currentLandlordPhone: body.currentLandlordPhone ?? null,
-      currentTenancyDuration: body.currentTenancyDuration ?? null,
-      currentRentAmount: body.currentRentAmount ?? null,
-      previousLandlord: body.previousLandlord ?? null,
-      previousLandlordPhone: body.previousLandlordPhone ?? null,
-      previousAddressRented: body.previousAddressRented ?? null,
-      previousRentAmount: body.previousRentAmount ?? null,
-      felonyHistory: body.felonyHistory ?? null,
-      interest: body.interest ?? null,
-      electronicSignature: body.electronicSignature ?? null,
-      signatureDate: body.signatureDate ?? null,
-    },
-  });
-
-  const result = await screenTenant(application, rentPrice);
-
-  console.log("Screening result:", JSON.stringify(result));
-
-  if (result.score > 0) {
-    const updated = await prisma.application.update({
-      where: { id: application.id },
-      data: { aiScore: result.score, aiSummary: result.summary },
-    });
-    return NextResponse.json(updated, { status: 201 });
+  // Look up the unit's rent for screening — best-effort, never blocks a submission.
+  let rentPrice: number | null = null;
+  if (listingId) {
+    try {
+      const listing = await withDbRetry(
+        () => prisma.listing.findUnique({ where: { id: listingId } }),
+        "listing lookup"
+      );
+      rentPrice = listing?.rentPrice ?? null;
+    } catch (err) {
+      console.error("Listing lookup failed (continuing without rent):", err);
+    }
   }
 
-  // Score 0 means API error — return the application without a score rather than saving 0
-  console.error("Screening returned error score for new application:", result.summary);
+  const str = (key: string) => (body[key] as string | undefined) ?? null;
+
+  // 1) Save the application. This is the only step allowed to fail the request.
+  let application;
+  try {
+    application = await withDbRetry(
+      () =>
+        prisma.application.create({
+          data: {
+            applicantName,
+            phone,
+            listingId,
+            rentPrice,
+            presentAddress: str("presentAddress"),
+            townStateZip: str("townStateZip"),
+            ssn: str("ssn"),
+            driversLicense: str("driversLicense"),
+            birthDate: str("birthDate"),
+            employer: str("employer"),
+            employerAddress: str("employerAddress"),
+            employerTownStateZip: str("employerTownStateZip"),
+            employerPhone: str("employerPhone"),
+            employmentDuration: str("employmentDuration"),
+            monthlyWages: str("monthlyWages"),
+            previousEmployer: str("previousEmployer"),
+            spouseName: str("spouseName"),
+            spouseDriversLicense: str("spouseDriversLicense"),
+            spouseBirthDate: str("spouseBirthDate"),
+            spouseSsn: str("spouseSsn"),
+            spouseEmployer: str("spouseEmployer"),
+            spouseEmployerAddress: str("spouseEmployerAddress"),
+            spouseEmployerTownStateZip: str("spouseEmployerTownStateZip"),
+            spouseEmployerPhone: str("spouseEmployerPhone"),
+            spouseEmploymentDuration: str("spouseEmploymentDuration"),
+            spouseMonthlyWages: str("spouseMonthlyWages"),
+            spousePreviousEmployer: str("spousePreviousEmployer"),
+            childrenResiding: str("childrenResiding"),
+            adultsResiding: str("adultsResiding"),
+            currentLandlord: str("currentLandlord"),
+            currentLandlordPhone: str("currentLandlordPhone"),
+            currentTenancyDuration: str("currentTenancyDuration"),
+            currentRentAmount: str("currentRentAmount"),
+            previousLandlord: str("previousLandlord"),
+            previousLandlordPhone: str("previousLandlordPhone"),
+            previousAddressRented: str("previousAddressRented"),
+            previousRentAmount: str("previousRentAmount"),
+            felonyHistory: str("felonyHistory"),
+            interest: str("interest"),
+            electronicSignature: str("electronicSignature"),
+            signatureDate: str("signatureDate"),
+          },
+        }),
+      "application create"
+    );
+  } catch (err) {
+    console.error(
+      "Application create failed:",
+      err instanceof Error ? err.stack ?? err.message : err
+    );
+    return NextResponse.json(
+      { error: "We couldn't save your application. Please try again." },
+      { status: 503 }
+    );
+  }
+
+  // 2) AI screening is best-effort. A saved application must NEVER be reported
+  //    to the applicant as a failure just because screening/update hiccuped.
+  try {
+    const result = await screenTenant(application, rentPrice);
+    if (result.score > 0) {
+      const updated = await withDbRetry(
+        () =>
+          prisma.application.update({
+            where: { id: application.id },
+            data: { aiScore: result.score, aiSummary: result.summary },
+          }),
+        "application screening update"
+      );
+      return NextResponse.json(updated, { status: 201 });
+    }
+    console.error("Screening returned error score for new application:", result.summary);
+  } catch (err) {
+    console.error("Screening/update failed (application still saved):", err);
+  }
+
   return NextResponse.json(application, { status: 201 });
 }

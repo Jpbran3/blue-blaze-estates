@@ -60,7 +60,13 @@ export async function POST(request: NextRequest) {
 
   const applicantName = body.applicantName as string | undefined;
   const phone = body.phone as string | undefined;
-  const listingId = (body.listingId as string | null | undefined) ?? null;
+
+  // Normalize listingId: the form sends "" when no unit is selected. An empty
+  // string (or any id that doesn't match a real listing) would violate the
+  // Listing foreign key and make the insert fail, so coerce those to null.
+  const rawListingId = (body.listingId as string | null | undefined) ?? null;
+  let listingId: string | null =
+    rawListingId && rawListingId.trim() !== "" ? rawListingId.trim() : null;
 
   if (!applicantName || !phone) {
     return NextResponse.json(
@@ -69,17 +75,24 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Look up the unit's rent for screening — best-effort, never blocks a submission.
+  // Look up the unit's rent for screening, and verify the listing actually
+  // exists — if it doesn't, drop the link rather than fail the foreign key.
   let rentPrice: number | null = null;
   if (listingId) {
+    const lookupId = listingId;
     try {
       const listing = await withDbRetry(
-        () => prisma.listing.findUnique({ where: { id: listingId } }),
+        () => prisma.listing.findUnique({ where: { id: lookupId } }),
         "listing lookup"
       );
-      rentPrice = listing?.rentPrice ?? null;
+      if (listing) {
+        rentPrice = listing.rentPrice ?? null;
+      } else {
+        listingId = null; // referenced unit no longer exists
+      }
     } catch (err) {
-      console.error("Listing lookup failed (continuing without rent):", err);
+      console.error("Listing lookup failed (saving without listing link):", err);
+      listingId = null;
     }
   }
 

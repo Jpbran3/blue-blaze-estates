@@ -8,6 +8,8 @@ import Link from "next/link";
 export const revalidate = 60;
 
 async function getCities() {
+  if (!process.env.TURSO_DATABASE_URL) return [];
+
   try {
     const cities = await prisma.city.findMany({
       include: {

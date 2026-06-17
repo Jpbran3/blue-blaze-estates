@@ -12,6 +12,8 @@ interface Props {
 }
 
 async function getCity(slug: string) {
+  if (!process.env.TURSO_DATABASE_URL) return null;
+
   try {
     return await prisma.city.findUnique({
       where: { slug },
@@ -32,10 +34,12 @@ async function getCity(slug: string) {
 export async function generateMetadata({ params }: Props) {
   const { citySlug } = await params;
   let city = null;
-  try {
-    city = await prisma.city.findUnique({ where: { slug: citySlug } });
-  } catch (err) {
-    console.error("generateMetadata city lookup failed:", err);
+  if (process.env.TURSO_DATABASE_URL) {
+    try {
+      city = await prisma.city.findUnique({ where: { slug: citySlug } });
+    } catch (err) {
+      console.error("generateMetadata city lookup failed:", err);
+    }
   }
   if (!city) return { title: "City Not Found" };
   return {

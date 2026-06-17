@@ -16,6 +16,7 @@ interface ListingCardProps {
 }
 
 export default function ListingCard({
+  id,
   title,
   description,
   bedrooms,
@@ -116,7 +117,7 @@ export default function ListingCard({
               <span className="text-sm font-normal text-gray-500">/mo</span>
             </span>
             <Link
-              href={`/apply?city=${citySlug}`}
+              href={`/apply?city=${encodeURIComponent(citySlug)}&listing=${encodeURIComponent(id)}`}
               className="bg-blue-900 hover:bg-blue-800 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors duration-200"
             >
               Apply Now

@@ -525,7 +525,17 @@ function CitiesTab() {
               const res = await fetch("/api/admin/setup-db", { method: "POST" });
               const data = await res.json().catch(() => null);
               if (res.ok) {
-                alert(`Database ready. Tables: ${(data?.tables ?? []).join(", ")}`);
+                const db = data?.db;
+                const dbLine = db
+                  ? `\n\nDatabase URL type: ${db.scheme}${
+                      db.isEphemeral
+                        ? " — WARNING: this is a local/ephemeral database, not your remote Turso DB. Data will NOT persist. Fix TURSO_DATABASE_URL in Vercel."
+                        : ""
+                    }`
+                  : "";
+                alert(
+                  `Tables created: ${(data?.tables ?? []).join(", ")}${dbLine}`
+                );
                 load();
               } else {
                 alert(`Setup failed: ${data?.error ?? res.status}`);

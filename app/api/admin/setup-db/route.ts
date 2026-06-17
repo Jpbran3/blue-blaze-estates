@@ -95,6 +95,40 @@ const STATEMENTS: string[] = [
   `CREATE UNIQUE INDEX IF NOT EXISTS "City_slug_key" ON "City"("slug")`,
 ];
 
+// Safe view of TURSO_DATABASE_URL: reveals only the scheme/host shape so we can
+// tell a remote Turso URL (libsql://...turso.io) apart from an ephemeral local
+// one (file:..., :memory:). Never returns the auth token or full credentials.
+function describeDbUrl() {
+  const raw = process.env.TURSO_DATABASE_URL ?? "";
+  const scheme = raw.includes("://") ? raw.split("://")[0] : raw.startsWith(":memory:") ? ":memory:" : "(none)";
+  const isRemote = /^(libsql|https|wss|http|ws)$/i.test(scheme) && /turso\.io|\./.test(raw);
+  const isEphemeral = scheme === "file" || raw.startsWith(":memory:") || raw === "" || scheme === "(none)";
+  return {
+    scheme,
+    isRemote,
+    isEphemeral,
+    configured: raw.length > 0,
+    authTokenPresent: !!process.env.TURSO_AUTH_TOKEN,
+  };
+}
+
+export async function GET() {
+  if (!(await isAuthenticated())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  let tables: string[] = [];
+  let queryError: string | null = null;
+  try {
+    const rows = await prisma.$queryRawUnsafe<{ name: string }[]>(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name"
+    );
+    tables = rows.map((t) => t.name);
+  } catch (err) {
+    queryError = err instanceof Error ? err.message : String(err);
+  }
+  return NextResponse.json({ db: describeDbUrl(), tables, queryError });
+}
+
 export async function POST() {
   if (!(await isAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -109,6 +143,7 @@ export async function POST() {
     );
     return NextResponse.json({
       ok: true,
+      db: describeDbUrl(),
       tables: tables.map((t) => t.name),
     });
   } catch (err) {

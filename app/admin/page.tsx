@@ -519,39 +519,12 @@ function CitiesTab() {
     <div>
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold text-gray-800">Cities</h2>
-        <div className="flex gap-2">
-          <button
-            onClick={async () => {
-              const res = await fetch("/api/admin/setup-db", { method: "POST" });
-              const data = await res.json().catch(() => null);
-              if (res.ok) {
-                const db = data?.db;
-                const dbLine = db
-                  ? `\n\nDatabase URL type: ${db.scheme}${
-                      db.isEphemeral
-                        ? " — WARNING: this is a local/ephemeral database, not your remote Turso DB. Data will NOT persist. Fix TURSO_DATABASE_URL in Vercel."
-                        : ""
-                    }`
-                  : "";
-                alert(
-                  `Tables created: ${(data?.tables ?? []).join(", ")}${dbLine}`
-                );
-                load();
-              } else {
-                alert(`Setup failed: ${data?.error ?? res.status}`);
-              }
-            }}
-            className="bg-gray-100 text-gray-600 px-4 py-2 rounded-lg text-sm hover:bg-gray-200 transition-colors"
-          >
-            Set up database
-          </button>
-          <button
-            onClick={openAdd}
-            className="bg-blue-900 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800 transition-colors"
-          >
-            + Add City
-          </button>
-        </div>
+        <button
+          onClick={openAdd}
+          className="bg-blue-900 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800 transition-colors"
+        >
+          + Add City
+        </button>
       </div>
 
       {showForm && (

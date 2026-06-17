@@ -437,12 +437,28 @@ function CitiesTab() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
+  const fetchCities = useCallback(async () => {
     const res = await fetch("/api/cities");
-    if (res.ok) setCities(await res.json());
+    if (!res.ok) return null;
+    return (await res.json()) as City[];
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  const load = useCallback(async () => {
+    const nextCities = await fetchCities();
+    if (nextCities) setCities(nextCities);
+  }, [fetchCities]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetchCities().then((nextCities) => {
+      if (!cancelled && nextCities) setCities(nextCities);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchCities]);
 
   function openAdd() {
     setEditCity(null);
@@ -673,16 +689,38 @@ function ListingsTab() {
     status: "available",
   });
 
-  const load = useCallback(async () => {
+  const fetchListingData = useCallback(async () => {
     const [lr, cr] = await Promise.all([
       fetch("/api/listings"),
       fetch("/api/cities"),
     ]);
-    setListings(await lr.json());
-    setCities(await cr.json());
+    if (!lr.ok || !cr.ok) return null;
+    return {
+      listings: (await lr.json()) as Listing[],
+      cities: (await cr.json()) as City[],
+    };
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  const load = useCallback(async () => {
+    const data = await fetchListingData();
+    if (!data) return;
+    setListings(data.listings);
+    setCities(data.cities);
+  }, [fetchListingData]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetchListingData().then((data) => {
+      if (cancelled || !data) return;
+      setListings(data.listings);
+      setCities(data.cities);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchListingData]);
 
   function openAdd() {
     setEditListing(null);
@@ -1017,12 +1055,28 @@ function ApplicationsTab() {
   const [editDraft, setEditDraft] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
-  const load = useCallback(async () => {
+  const fetchApplications = useCallback(async () => {
     const res = await fetch("/api/applications");
-    if (res.ok) setApps(await res.json());
+    if (!res.ok) return null;
+    return (await res.json()) as Application[];
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  const load = useCallback(async () => {
+    const nextApps = await fetchApplications();
+    if (nextApps) setApps(nextApps);
+  }, [fetchApplications]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetchApplications().then((nextApps) => {
+      if (!cancelled && nextApps) setApps(nextApps);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchApplications]);
 
   async function markContacted(id: string) {
     await fetch(`/api/applications/${id}`, {
@@ -1333,12 +1387,28 @@ function ArchiveTab() {
   const [editDraft, setEditDraft] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
-  const load = useCallback(async () => {
+  const fetchArchivedApplications = useCallback(async () => {
     const res = await fetch("/api/applications?archived=true");
-    if (res.ok) setApps(await res.json());
+    if (!res.ok) return null;
+    return (await res.json()) as Application[];
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  const load = useCallback(async () => {
+    const nextApps = await fetchArchivedApplications();
+    if (nextApps) setApps(nextApps);
+  }, [fetchArchivedApplications]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetchArchivedApplications().then((nextApps) => {
+      if (!cancelled && nextApps) setApps(nextApps);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchArchivedApplications]);
 
   async function unarchive(id: string) {
     await fetch(`/api/applications/${id}`, {

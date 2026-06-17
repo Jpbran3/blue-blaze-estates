@@ -1,6 +1,5 @@
 // Run: node scripts/gen-favicon.mjs
 import sharp from "sharp";
-import { createWriteStream } from "fs";
 import { writeFile } from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -8,14 +7,19 @@ import { fileURLToPath } from "url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
 
-// Brand: black background, bold white "R" — matches site's black/white palette and Inter font style
+// Brand mark matching the inline Header/Footer logo.
 function makeSvg(size) {
   const r = Math.round(size * 0.15); // corner radius scales with size
-  const fontSize = Math.round(size * 0.62);
-  const baseline = Math.round(size * 0.72);
+  const fontSize = Math.round(size * 0.38);
+  const firstX = Math.round(size * 0.39);
+  const secondX = Math.round(size * 0.61);
+  const firstBaseline = Math.round(size * 0.65);
+  const secondBaseline = Math.round(size * 0.82);
   return Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-  <rect width="${size}" height="${size}" rx="${r}" fill="#000000"/>
-  <text x="${size / 2}" y="${baseline}" font-family="Arial, Helvetica, sans-serif" font-size="${fontSize}" font-weight="700" fill="#ffffff" text-anchor="middle" dominant-baseline="auto">R</text>
+  <rect width="${size}" height="${size}" rx="${r}" fill="#ffffff"/>
+  <path d="M${size * 0.5} ${size * 0.15}L${size * 0.85} ${size * 0.44}V${size * 0.8}a${size * 0.05} ${size * 0.05} 0 0 1-${size * 0.05} ${size * 0.05}H${size * 0.2}a${size * 0.05} ${size * 0.05} 0 0 1-${size * 0.05}-${size * 0.05}V${size * 0.44}L${size * 0.5} ${size * 0.15}z" fill="#1d4ed8"/>
+  <text x="${firstX}" y="${firstBaseline}" font-family="Georgia, 'Times New Roman', serif" font-size="${fontSize}" font-weight="700" fill="#ffffff" text-anchor="middle" dominant-baseline="auto">B</text>
+  <text x="${secondX}" y="${secondBaseline}" font-family="Georgia, 'Times New Roman', serif" font-size="${fontSize}" font-weight="700" fill="#93c5fd" text-anchor="middle" dominant-baseline="auto">B</text>
 </svg>`);
 }
 

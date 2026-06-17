@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -104,6 +104,7 @@ const inputCls = (hasError?: boolean) =>
 function ApplyForm() {
   const searchParams = useSearchParams();
   const cityParam = searchParams.get("city");
+  const listingParam = searchParams.get("listing");
 
   const today = new Date().toLocaleDateString("en-US", {
     month: "long",
@@ -117,31 +118,64 @@ function ApplyForm() {
   const [spouseOpen, setSpouseOpen] = useState(false);
   const [cities, setCities] = useState<City[]>([]);
   const [listings, setListings] = useState<Listing[]>([]);
-  const [selectedCitySlug, setSelectedCitySlug] = useState("");
+  const [selectedCitySlug, setSelectedCitySlug] = useState(cityParam ?? "");
+  const [pendingListingId, setPendingListingId] = useState(listingParam ?? "");
 
-  useEffect(() => {
-    fetch("/api/cities")
-      .then((r) => r.json())
-      .then(setCities)
-      .catch(() => {});
+  const set = useCallback((field: FormKey, value: string) => {
+    setForm((f) => ({ ...f, [field]: value }));
+    setErrors((current) => {
+      if (!current[field]) return current;
+      return { ...current, [field]: undefined };
+    });
   }, []);
 
   useEffect(() => {
-    if (cityParam) setSelectedCitySlug(cityParam);
-  }, [cityParam]);
+    let cancelled = false;
+
+    fetch("/api/cities")
+      .then((r) => r.json())
+      .then((nextCities) => {
+        if (!cancelled) setCities(nextCities);
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
-    if (!selectedCitySlug) { setListings([]); return; }
-    fetch(`/api/listings?citySlug=${selectedCitySlug}&status=available`)
-      .then((r) => r.json())
-      .then(setListings)
-      .catch(() => setListings([]));
-  }, [selectedCitySlug]);
+    if (!selectedCitySlug) {
+      setListings([]);
+      setPendingListingId("");
+      set("listingId", "");
+      set("interest", "");
+      return;
+    }
 
-  function set(field: FormKey, value: string) {
-    setForm((f) => ({ ...f, [field]: value }));
-    if (errors[field]) setErrors((e) => ({ ...e, [field]: undefined }));
-  }
+    let cancelled = false;
+
+    fetch(`/api/listings?citySlug=${encodeURIComponent(selectedCitySlug)}&status=available`)
+      .then((r) => r.json())
+      .then((nextListings: Listing[]) => {
+        if (cancelled) return;
+        setListings(nextListings);
+
+        if (pendingListingId) {
+          const listing = nextListings.find((l) => l.id === pendingListingId);
+          if (listing) {
+            set("listingId", listing.id);
+            set("interest", listing.title);
+          }
+          setPendingListingId("");
+        }
+      })
+      .catch(() => setListings([]));
+
+    return () => {
+      cancelled = true;
+    };
+  }, [pendingListingId, selectedCitySlug, set]);
 
   function validate() {
     const errs: Partial<Record<FormKey, string>> = {};
@@ -583,6 +617,7 @@ function ApplyForm() {
             value={selectedCitySlug}
             onChange={(e) => {
               setSelectedCitySlug(e.target.value);
+              setPendingListingId("");
               set("listingId", "");
               set("interest", "");
             }}

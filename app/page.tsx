@@ -56,7 +56,7 @@ export default async function HomePage() {
                 />
               ),
               title: "Quality Homes",
-              desc: "Well-maintained properties ready for move-in",
+              desc: "View rental homes and current availability",
             },
             {
               icon: (
@@ -67,7 +67,7 @@ export default async function HomePage() {
                 />
               ),
               title: "Fair Pricing",
-              desc: "Transparent, competitive rents with no hidden fees",
+              desc: "View advertised rents for available homes",
             },
             {
               icon: (
@@ -94,7 +94,7 @@ export default async function HomePage() {
                   {icon}
                 </svg>
               </div>
-              <h3 className="font-semibold text-gray-800 mb-1">{title}</h3>
+              <h2 className="font-semibold text-gray-800 mb-1">{title}</h2>
               <p className="text-gray-500 text-sm">{desc}</p>
             </div>
           ))}
@@ -138,8 +138,7 @@ export default async function HomePage() {
             Ready to Apply?
           </h2>
           <p className="text-blue-100 mb-8 text-lg">
-            Fill out our quick application form and we&apos;ll be in touch
-            within one business day.
+            Submit an application and our team will contact you about next steps.
           </p>
           <Link
             href="/apply"

@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { screenTenant } from "@/lib/screenTenant";
 import { isAuthenticated } from "@/lib/adminAuth";
+import { parseApplication } from "@/lib/applicationInput";
+import { readJsonObject, RequestError } from "@/lib/requestBody";
+import { rateLimit } from "@/lib/rateLimit";
 
 export const maxDuration = 60;
 
@@ -17,6 +20,7 @@ export async function GET(request: NextRequest) {
   const applications = await prisma.application.findMany({
     where: { archived },
     orderBy: { createdAt: "desc" },
+    omit: { ssn: true, spouseSsn: true, childrenResiding: true },
   });
   return NextResponse.json(applications);
 }
@@ -32,7 +36,7 @@ async function withDbRetry<T>(fn: () => Promise<T>, label: string): Promise<T> {
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     if (RETRYABLE_DB_ERROR.test(msg)) {
-      console.error(`${label} hit a transient DB error — retrying once:`, msg);
+      console.error(`${label}: transient database failure; retrying once.`);
       await new Promise((r) => setTimeout(r, 300));
       return await fn();
     }
@@ -41,29 +45,17 @@ async function withDbRetry<T>(fn: () => Promise<T>, label: string): Promise<T> {
 }
 
 export async function POST(request: NextRequest) {
-  let body: Record<string, unknown>;
+  let data: ReturnType<typeof parseApplication>;
   try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+    const budget = await rateLimit(request, "application", 10, 3600);
+    if (!budget.allowed) return NextResponse.json({ error: "Too many submissions. Please try later or call us." }, { status: 429, headers: { "Retry-After": String(budget.retryAfter) } });
+    data = parseApplication(await readJsonObject(request));
+  } catch (error) {
+    if (error instanceof RequestError) return NextResponse.json({ error: error.message }, { status: error.status });
+    console.error("Application intake unavailable.");
+    return NextResponse.json({ error: "We couldn't accept your application. Please try again or call us." }, { status: 503 });
   }
-
-  const applicantName = body.applicantName as string | undefined;
-  const phone = body.phone as string | undefined;
-
-  // Normalize listingId: the form sends "" when no unit is selected. An empty
-  // string (or any id that doesn't match a real listing) would violate the
-  // Listing foreign key and make the insert fail, so coerce those to null.
-  const rawListingId = (body.listingId as string | null | undefined) ?? null;
-  let listingId: string | null =
-    rawListingId && rawListingId.trim() !== "" ? rawListingId.trim() : null;
-
-  if (!applicantName || !phone) {
-    return NextResponse.json(
-      { error: "applicantName and phone are required" },
-      { status: 400 }
-    );
-  }
+  let listingId = data.listingId;
 
   // Look up the unit's rent for screening, and verify the listing actually
   // exists — if it doesn't, drop the link rather than fail the foreign key.
@@ -80,13 +72,11 @@ export async function POST(request: NextRequest) {
       } else {
         listingId = null; // referenced unit no longer exists
       }
-    } catch (err) {
-      console.error("Listing lookup failed (saving without listing link):", err);
+    } catch {
+      console.error("Listing lookup failed; saving without listing link.");
       listingId = null;
     }
   }
-
-  const str = (key: string) => (body[key] as string | undefined) ?? null;
 
   // 1) Save the application. This is the only step allowed to fail the request.
   let application;
@@ -94,60 +84,13 @@ export async function POST(request: NextRequest) {
     application = await withDbRetry(
       () =>
         prisma.application.create({
-          data: {
-            applicantName,
-            phone,
-            listingId,
-            rentPrice,
-            presentAddress: str("presentAddress"),
-            townStateZip: str("townStateZip"),
-            // SSN is deliberately NOT collected or stored. The columns remain in
-            // the schema only so existing rows aren't dropped — never write to
-            // them, and never add an ssn field back to the public form.
-            driversLicense: str("driversLicense"),
-            birthDate: str("birthDate"),
-            employer: str("employer"),
-            employerAddress: str("employerAddress"),
-            employerTownStateZip: str("employerTownStateZip"),
-            employerPhone: str("employerPhone"),
-            employmentDuration: str("employmentDuration"),
-            monthlyWages: str("monthlyWages"),
-            previousEmployer: str("previousEmployer"),
-            spouseName: str("spouseName"),
-            spouseDriversLicense: str("spouseDriversLicense"),
-            spouseBirthDate: str("spouseBirthDate"),
-            spouseEmployer: str("spouseEmployer"),
-            spouseEmployerAddress: str("spouseEmployerAddress"),
-            spouseEmployerTownStateZip: str("spouseEmployerTownStateZip"),
-            spouseEmployerPhone: str("spouseEmployerPhone"),
-            spouseEmploymentDuration: str("spouseEmploymentDuration"),
-            spouseMonthlyWages: str("spouseMonthlyWages"),
-            spousePreviousEmployer: str("spousePreviousEmployer"),
-            // Occupant count replaces the old children names/ages field —
-            // familial status is protected under the Fair Housing Act.
-            occupantCount: str("occupantCount"),
-            adultsResiding: str("adultsResiding"),
-            currentLandlord: str("currentLandlord"),
-            currentLandlordPhone: str("currentLandlordPhone"),
-            currentTenancyDuration: str("currentTenancyDuration"),
-            currentRentAmount: str("currentRentAmount"),
-            previousLandlord: str("previousLandlord"),
-            previousLandlordPhone: str("previousLandlordPhone"),
-            previousAddressRented: str("previousAddressRented"),
-            previousRentAmount: str("previousRentAmount"),
-            felonyHistory: str("felonyHistory"),
-            interest: str("interest"),
-            electronicSignature: str("electronicSignature"),
-            signatureDate: str("signatureDate"),
-          },
+          data: { ...data, listingId, rentPrice },
+          omit: { ssn: true, spouseSsn: true, childrenResiding: true },
         }),
       "application create"
     );
-  } catch (err) {
-    console.error(
-      "Application create failed:",
-      err instanceof Error ? err.stack ?? err.message : err
-    );
+  } catch {
+    console.error("Application create failed.");
     return NextResponse.json(
       { error: "We couldn't save your application. Please try again." },
       { status: 503 }
@@ -157,9 +100,10 @@ export async function POST(request: NextRequest) {
   // 2) AI screening is best-effort. A saved application must NEVER be reported
   //    to the applicant as a failure just because screening/update hiccuped.
   try {
+    if (application.manualReviewRequested) return NextResponse.json({ ok: true, id: application.id }, { status: 201 });
     const result = await screenTenant(application, rentPrice);
     if (result.score > 0) {
-      const updated = await withDbRetry(
+      await withDbRetry(
         () =>
           prisma.application.update({
             where: { id: application.id },
@@ -167,16 +111,16 @@ export async function POST(request: NextRequest) {
           }),
         "application screening update"
       );
-      return NextResponse.json(updated, { status: 201 });
+      return NextResponse.json({ ok: true, id: application.id }, { status: 201 });
     }
     // Log the id only — the summary carries the applicant's income figures.
     console.error(
       "Screening returned an error score for application:",
       application.id
     );
-  } catch (err) {
-    console.error("Screening/update failed (application still saved):", err);
+  } catch {
+    console.error("Screening/update failed; application remains saved.");
   }
 
-  return NextResponse.json(application, { status: 201 });
+  return NextResponse.json({ ok: true, id: application.id }, { status: 201 });
 }

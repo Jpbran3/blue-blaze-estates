@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import crypto from "crypto";
+import { createSession, validSession } from "./session";
 
 /**
  * Shared admin auth. Previously each API route inlined
@@ -10,9 +11,6 @@ import crypto from "crypto";
 
 export const ADMIN_SESSION_COOKIE = "admin_session";
 
-export function hashPassword(password: string) {
-  return crypto.createHash("sha256").update(password).digest("hex");
-}
 
 /** The configured admin password, or null if it isn't usably set. */
 function configuredPassword(): string | null {
@@ -44,7 +42,7 @@ export async function isAuthenticated(): Promise<boolean> {
   const session = cookieStore.get(ADMIN_SESSION_COOKIE);
   if (!session?.value) return false;
 
-  return safeEqual(session.value, hashPassword(adminPassword));
+  return validSession(session.value, adminPassword);
 }
 
 /** Checks a submitted login password. Always false when none is configured. */
@@ -62,5 +60,5 @@ export function verifyPassword(submitted: unknown): boolean {
 /** The cookie value to set on a successful login. */
 export function sessionValue(): string | null {
   const adminPassword = configuredPassword();
-  return adminPassword ? hashPassword(adminPassword) : null;
+  return adminPassword ? createSession(adminPassword) : null;
 }

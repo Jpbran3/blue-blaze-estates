@@ -1,29 +1,7 @@
 import type { NextConfig } from "next";
 
-// Content-Security-Policy. The site loads no third-party scripts, pixels, or
-// analytics — everything is first-party — so this can stay tight. Two carve-outs
-// are unavoidable:
-//   - 'unsafe-inline' on style-src: Tailwind v4 and next/font inject inline
-//     <style> at runtime.
-//   - blob:/data: on img-src: the listing lightbox and next/image use them.
-// If a third-party script is ever added, it must be allow-listed HERE rather
-// than by loosening script-src to 'unsafe-inline' — see AGENTS.md §2.
-const CSP = [
-  "default-src 'self'",
-  "script-src 'self' 'unsafe-inline'",
-  "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://*.public.blob.vercel-storage.com",
-  "font-src 'self' data:",
-  "connect-src 'self' https://*.public.blob.vercel-storage.com",
-  "frame-ancestors 'none'",
-  "form-action 'self'",
-  "base-uri 'self'",
-  "object-src 'none'",
-  "upgrade-insecure-requests",
-].join("; ");
-
+// Per-request script nonces and CSP are applied in proxy.ts.
 const securityHeaders = [
-  { key: "Content-Security-Policy", value: CSP },
   { key: "X-Frame-Options", value: "DENY" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
@@ -64,6 +42,7 @@ const nextConfig: NextConfig = {
         // data; keep them out of caches and out of search results entirely.
         source: "/apply",
         headers: [
+          { key: "X-Robots-Tag", value: "noindex, nofollow" },
           {
             key: "Cache-Control",
             value: "no-store, no-cache, must-revalidate, private",

@@ -6,6 +6,10 @@ import {
   verifyPassword,
 } from "@/lib/adminAuth";
 
+import { readJsonObject, RequestError } from "@/lib/requestBody";
+import { rateLimit } from "@/lib/rateLimit";
+import { SESSION_SECONDS } from "@/lib/session";
+
 const COOKIE_OPTIONS = {
   httpOnly: true,
   // Only sent over HTTPS in production; plain http://localhost still works in dev.
@@ -24,9 +28,13 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   let password: unknown;
   try {
-    ({ password } = await request.json());
-  } catch {
-    return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+    const budget = await rateLimit(request, "admin-login", 10, 900);
+    if (!budget.allowed) return NextResponse.json({ error: "Too many login attempts. Please try later." }, { status: 429, headers: { "Retry-After": String(budget.retryAfter) } });
+    ({ password } = await readJsonObject(request, 4096));
+  } catch (error) {
+    if (error instanceof RequestError) return NextResponse.json({ error: error.message }, { status: error.status });
+    console.error("Admin login unavailable.");
+    return NextResponse.json({ error: "Sign-in is temporarily unavailable." }, { status: 503 });
   }
 
   if (!verifyPassword(password)) {
@@ -43,7 +51,7 @@ export async function POST(request: NextRequest) {
   const response = NextResponse.json({ ok: true });
   response.cookies.set(ADMIN_SESSION_COOKIE, value, {
     ...COOKIE_OPTIONS,
-    maxAge: 60 * 60 * 24 * 7, // 7 days
+    maxAge: SESSION_SECONDS, // 7 days
   });
   return response;
 }

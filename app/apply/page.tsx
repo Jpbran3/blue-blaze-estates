@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useId, useRef, cloneElement, type ReactElement } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -81,15 +81,15 @@ function Field({
   error?: string;
   children: React.ReactNode;
 }) {
+  const id = useId();
+  const control = children as ReactElement<{ id?: string; "aria-invalid"?: boolean; "aria-describedby"?: string }>;
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700">
-        <span className="mb-1 inline-block">
-          {label} {required && <span className="text-red-700">*</span>}
-        </span>
-        <span className="block font-normal">{children}</span>
+      <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
+        {label} {required && <span className="text-red-700">*</span>}
       </label>
-      {error && <p className="text-red-700 text-xs mt-1">{error}</p>}
+      {cloneElement(control, { id, "aria-invalid": !!error, "aria-describedby": error ? `${id}-error` : undefined })}
+      {error && <p id={`${id}-error`} className="text-red-700 text-xs mt-1">{error}</p>}
     </div>
   );
 }
@@ -112,6 +112,14 @@ function ApplyForm() {
   const [form, setForm] = useState({ ...EMPTY_FORM });
   const [errors, setErrors] = useState<Partial<Record<FormKey, string>>>({});
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [manualReviewRequested, setManualReviewRequested] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const formRef = useRef<HTMLFormElement>(null);
+  const successRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (Object.keys(errors).length) formRef.current?.querySelector<HTMLInputElement>('[aria-invalid="true"]')?.focus();
+  }, [errors]);
+  useEffect(() => { if (status === "success") successRef.current?.focus(); }, [status]);
   const [spouseOpen, setSpouseOpen] = useState(false);
   const [cities, setCities] = useState<City[]>([]);
   const [listings, setListings] = useState<Listing[]>([]);
@@ -165,24 +173,27 @@ function ApplyForm() {
       const res = await fetch("/api/applications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, signatureDate: today }),
+        body: JSON.stringify({ ...form, signatureDate: today, manualReviewRequested }),
       });
-      if (!res.ok) throw new Error("Failed");
+      if (!res.ok) {
+        const result = await res.json().catch(() => null);
+        throw new Error(result?.error || "Please try again or call us directly.");
+      }
       setStatus("success");
-    } catch {
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : "Please try again or call us directly.");
       setStatus("error");
     }
   }
 
   if (status === "success") {
     return (
-      <div className="text-center py-12">
+      <div ref={successRef} tabIndex={-1} role="status" className="text-center py-12">
         <h2 className="font-display text-2xl md:text-3xl font-bold text-gray-900 mb-3">
           Application Submitted!
         </h2>
         <p className="text-gray-600 mb-6 max-w-md mx-auto">
-          Thank you! We&apos;ve received your application and will be in touch
-          within one business day.
+          Thank you! We&apos;ve received your application. Our team will review it and contact you about next steps.
         </p>
         <Link
           href="/"
@@ -195,10 +206,10 @@ function ApplyForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-2">
+    <form ref={formRef} onSubmit={handleSubmit} noValidate aria-busy={status === "submitting"} className="space-y-2">
+      {Object.keys(errors).length > 0 && <p role="alert" className="text-red-700">Please correct the marked fields before submitting.</p>}
       <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 text-sm text-blue-900 font-medium mb-6">
-        There is no application fee. Complete all sections below and we&apos;ll
-        be in touch within one business day.
+        Complete the application below. Our team will contact you about next steps.
       </div>
 
       {/* Applicant Information */}
@@ -460,7 +471,7 @@ function ApplyForm() {
           ask only for the total occupant count — which is what an occupancy
           standard actually needs — instead of the names and ages of children.
         */}
-        <Field label="Total number of people who would live in the home (including children)">
+        <Field label="Total number of people who would live in the home">
           <input
             type="number"
             inputMode="numeric"
@@ -621,6 +632,7 @@ function ApplyForm() {
             How your application is reviewed.
           </strong>{" "}
           Blue Blaze Estates uses an automated tool to produce a preliminary
+<<<<<<< Updated upstream
           score and summary of each application. It considers your employment,
           income, rental history and your answer to the criminal-history
           question; it is not given your name, address, contact details, or who
@@ -636,6 +648,14 @@ function ApplyForm() {
             blueblazeestates@gmail.com
           </a>{" "}
           or 618-942-7624 and we will review it manually.
+=======
+          score and summary of each application based on the information you
+          provide above. That score is only a starting point — a person at Blue
+          Blaze Estates reviews every application and makes the final decision.
+          No application is approved or denied automatically. Select “Manual review only” below if you do not want your application sent to the automated tool. For questions about a decision, contact{" "}
+          <a href="mailto:blueblazeestates@gmail.com" className="text-blue-900 underline underline-offset-2">blueblazeestates@gmail.com</a>{" "}
+          or <a href="tel:6189427624" className="text-blue-900 underline underline-offset-2">618-942-7624</a>.
+>>>>>>> Stashed changes
         </p>
         <p>
           Blue Blaze Estates is an Equal Housing Opportunity provider. We do not
@@ -654,6 +674,10 @@ function ApplyForm() {
           for how we handle the information on this form.
         </p>
       </div>
+      <label className="flex items-start gap-3 py-4 text-sm text-gray-700">
+        <input type="checkbox" checked={manualReviewRequested} onChange={e => setManualReviewRequested(e.target.checked)} className="mt-1 h-5 w-5 shrink-0 accent-blue-900" />
+        <span><strong>Manual review only.</strong> Do not send my application to the automated screening tool.</span>
+      </label>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
         <Field
           label="Electronic Signature (type your full name)"
@@ -679,8 +703,8 @@ function ApplyForm() {
       </div>
 
       {status === "error" && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm mt-4">
-          Something went wrong. Please try again or call us directly.
+        <div role="alert" className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm mt-4">
+          {submitError}
         </div>
       )}
 
@@ -699,7 +723,11 @@ export default function ApplyPage() {
   return (
     <>
       <Header />
+<<<<<<< Updated upstream
       <main id="main-content" tabIndex={-1} className="max-w-3xl mx-auto px-6 py-12 focus:outline-none">
+=======
+      <main id="main-content" tabIndex={-1} className="w-full min-w-0 max-w-3xl mx-auto px-6 py-12 focus:outline-none">
+>>>>>>> Stashed changes
         <div className="mb-8">
           <Link
             href="/"
@@ -718,13 +746,12 @@ export default function ApplyPage() {
             Back to Home
           </Link>
         </div>
-        <div className="bg-white rounded-2xl shadow-md p-8 md:p-10">
+        <div className="bg-white rounded-2xl shadow-md p-5 sm:p-8 md:p-10">
           <h1 className="font-display text-3xl md:text-4xl font-bold text-gray-900 mb-2">
             Rental Application
           </h1>
           <p className="text-gray-500 mb-8">
-            Complete all sections and submit. We will contact you within one
-            business day.
+            Complete the form to request a rental application review.
           </p>
           <Suspense fallback={<p className="text-gray-600">Loading form...</p>}>
             <ApplyForm />

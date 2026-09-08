@@ -30,8 +30,7 @@ export default function AccessibilityPage() {
           associated label — not just placeholder text.
         </li>
         <li>
-          The whole site can be operated by keyboard alone, and the element you
-          are on always shows a visible focus outline.
+          Keyboard controls and visible focus indicators are provided for navigation, forms, and photo galleries.
         </li>
         <li>
           A &ldquo;Skip to main content&rdquo; link lets keyboard and screen
@@ -46,15 +45,14 @@ export default function AccessibilityPage() {
           images are hidden from screen readers.
         </li>
         <li>
-          The homepage photo carousel stops advancing automatically for visitors
-          whose device is set to reduce motion.
+          The homepage slideshow starts paused and provides Play and Pause controls. Reduced-motion preferences are respected.
         </li>
         <li>
           Buttons and links are labeled with what they actually do, and
           icon-only controls carry accessible names.
         </li>
         <li>
-          The site reflows without horizontal scrolling at 200% browser zoom.
+          Responsive layouts support narrow screens and enlarged content. Data tables and photo thumbnail strips may use their own horizontal scrolling.
         </li>
       </ul>
 
@@ -76,7 +74,7 @@ export default function AccessibilityPage() {
       <h2>Tell us about a barrier</h2>
       <p>
         If any part of this site is difficult or impossible for you to use, we
-        want to hear about it and we will fix it. Please tell us the page and
+        want to hear about it so we can investigate. Please tell us the page and
         what happened:
       </p>
       <p>
@@ -91,9 +89,7 @@ export default function AccessibilityPage() {
         We aim to respond within{" "}
         <em>[NEEDS OWNER INPUT: response commitment — e.g. &ldquo;two business
         days&rdquo;]</em>
-        . If you cannot complete the rental application on this website for any
-        reason, call us and we will take your application over the phone or in
-        person. You will not be disadvantaged for applying that way.
+        . If you cannot complete the rental application on this website, please call or email us to request assistance or an accessible alternative.
       </p>
 
       <h2>Requesting an accommodation</h2>

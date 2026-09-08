@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { connection } from "next/server";
 import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 
@@ -29,11 +30,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  await connection(); // Nonces must be unique per request; never prerender this layout.
   return (
     <html lang="en" className="h-full">
       <body

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { screenTenant } from "@/lib/screenTenant";
 import { isAuthenticated } from "@/lib/adminAuth";
+import { readJsonObject, RequestError, applicationText } from "@/lib/requestBody";
 
 // Give the function more time on Vercel Pro/Teams (hobby stays at 10s)
 export const maxDuration = 60;
@@ -57,29 +58,38 @@ export async function PUT(
   }
 
   const { id } = await params;
-  const body = await request.json();
+  let body: Record<string, unknown>;
+  try { body = await readJsonObject(request); }
+  catch (error) { return NextResponse.json({ error: error instanceof RequestError ? error.message : "Invalid request." }, { status: error instanceof RequestError ? error.status : 400 }); }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const updateData: Record<string, any> = {};
+  const updateData: Record<string, string | boolean | null> = {};
 
-  if (body.status !== undefined) updateData.status = body.status;
-  if (body.archived !== undefined) updateData.archived = body.archived;
+  if (body.status !== undefined) {
+    if (!["new", "contacted", "approved", "rejected"].includes(String(body.status))) return NextResponse.json({ error: "Invalid status." }, { status: 400 });
+    updateData.status = String(body.status);
+  }
+  if (body.archived !== undefined) {
+    if (typeof body.archived !== "boolean") return NextResponse.json({ error: "Invalid archive value." }, { status: 400 });
+    updateData.archived = body.archived;
+  }
 
   for (const field of EDITABLE_FIELDS) {
     if (field in body) {
-      updateData[field] = body[field] || null;
+      try { updateData[field] = applicationText(body, field, ["applicantName", "phone", "electronicSignature"].includes(field)); }
+      catch { return NextResponse.json({ error: `Invalid ${field}.` }, { status: 400 }); }
     }
   }
 
   const application = await prisma.application.update({
     where: { id },
     data: updateData,
+    omit: { ssn: true, spouseSsn: true, childrenResiding: true },
   });
 
   // Re-run AI screening whenever content fields are edited.
   // Always runs — status/archived-only updates don't contain any EDITABLE_FIELDS.
   const hasContentChanges = EDITABLE_FIELDS.some((f) => f in body);
-  if (hasContentChanges) {
+  if (hasContentChanges && !application.manualReviewRequested) {
     const result = await screenTenant(application, application.rentPrice);
 
     // Only write the new score if the AI call actually succeeded (score > 0).
@@ -89,12 +99,13 @@ export async function PUT(
       const rescreened = await prisma.application.update({
         where: { id },
         data: { aiScore: result.score, aiSummary: result.summary },
+        omit: { ssn: true, spouseSsn: true, childrenResiding: true },
       });
       return NextResponse.json(rescreened);
     }
 
     // Screening failed — return the saved field changes but keep old score intact
-    console.error("Re-screening returned error score after admin edit:", result.summary);
+    console.error("Re-screening failed after admin edit; manual review required.");
   }
 
   return NextResponse.json(application);

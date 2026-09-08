@@ -55,11 +55,9 @@ export interface ApplicationData {
 // The felony rule below reflects the owner's stated policy: a reported felony
 // lands the application at 1 so it surfaces at the bottom of the queue for
 // human review. It is NOT an automatic denial, and the summary must say so.
-// [NEEDS OWNER SIGN-OFF] — HUD guidance treats criminal-history screening
-// without individualized assessment (nature, recency, relevance of the offense)
-// as a disparate-impact risk. Scoring every felony 1 regardless of what it was
-// or when it happened preserves most of that exposure even though the hard stop
-// is gone. The owner should confirm this policy in writing.
+// Owner explicitly requested retaining these screening rules on September 7, 2026.
+// [NEEDS ATTORNEY REVIEW] Criminal-history and income criteria require review by
+// qualified Illinois housing counsel; owner approval does not certify compliance.
 const SYSTEM_PROMPT = `You are a tenant screening assistant for Blue Blaze Estates, a residential property company in Illinois. Evaluate the rental application below and return a preliminary score and summary.
 
 Your output is ADVISORY ONLY. A person at Blue Blaze Estates reviews every application and makes the final decision. Nothing you return approves or denies anyone.
@@ -201,15 +199,15 @@ export async function screenTenant(
 
     const parsed = JSON.parse(jsonMatch[0]) as { score: number; summary: string };
     if (
-      typeof parsed.score !== "number" ||
-      typeof parsed.summary !== "string"
+      !Number.isInteger(parsed.score) || parsed.score < 1 || parsed.score > 10 ||
+      typeof parsed.summary !== "string" || !parsed.summary.trim() || parsed.summary.length > 4000
     ) {
       return { score: 0, summary: "Screening error — please review manually." };
     }
 
     return { score: parsed.score, summary: parsed.summary };
-  } catch (apiErr) {
-    console.error("Anthropic API call failed:", apiErr);
+  } catch {
+    console.error("Screening provider failed; manual review required.");
     return { score: 0, summary: "Screening error — please review manually." };
   }
 }

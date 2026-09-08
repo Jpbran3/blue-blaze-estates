@@ -63,6 +63,7 @@ export default function PrivacyPolicyPage() {
 
       <h2>Automated review of applications</h2>
       <p>
+<<<<<<< Updated upstream
         We use an automated tool to produce a preliminary score and written
         summary of each application. It runs automatically when you submit.
       </p>
@@ -97,6 +98,21 @@ export default function PrivacyPolicyPage() {
         information — is sent to our service provider Anthropic, PBC, which
         operates the automated tool. It is used to generate your summary and is
         not used to train their models.
+=======
+        Unless you select “Manual review only,” this site sends application information to Anthropic to generate a preliminary score and summary. The information sent includes your name, contact and address details, employer and income information, spouse name and employment information if supplied, landlord and rental-history information, criminal-history response, the selected unit or notes, and the unit’s rent.
+      </p>
+      <p>
+        Social Security numbers are not collected. Driver’s license numbers, birth dates, electronic signatures, occupant count, and other-adult names are not included in the structured information sent to the tool. Please do not put those details into other fields.
+      </p>
+      <p>
+        The tool applies the property owner’s income, employment, rental-history, and criminal-history screening criteria. A reported felony is assigned the lowest preliminary score for individualized human review. The score is advisory and does not automatically approve or deny an application.
+      </p>
+      <p>
+        Select <strong>Manual review only</strong> before submitting if you do not want your application sent to Anthropic. That preference is saved with the application and also prevents automatic screening when staff edit it. For an application already submitted, contact us about manual review, correction, or deletion; a later request cannot undo information already sent to a provider.
+      </p>
+      <p>
+        Anthropic processes information to provide the screening service. Its processing and retention are governed by the service agreement and applicable provider policies. Contact us with questions about this processing.
+>>>>>>> Stashed changes
       </p>
 
       <h2>Who else your information reaches</h2>
@@ -128,38 +144,30 @@ export default function PrivacyPolicyPage() {
 
       <h2>Cookies and tracking</h2>
       <p>
-        This site uses <strong>no advertising pixels, no analytics services, and
-        no cross-site trackers</strong>. We set exactly one cookie: a session
-        cookie used to keep the property owner signed in to the private admin
-        dashboard. It is strictly necessary for that function, and it is never
-        set for ordinary visitors browsing listings or submitting an
-        application. Because we run no non-essential tracking, there is nothing
-        here to opt out of.
+        The website does not include advertising pixels, analytics integrations, or cross-site tracking scripts. An essential <code>admin_session</code> cookie keeps authorized staff signed in for up to seven days, unless they sign out sooner. Ordinary listing and application visitors do not need this cookie. We do not currently use non-essential tracking cookies that require a tracking preference control.
+      </p>
+      <p>
+        To limit abusive requests, the site stores a hashed network identifier and temporary request counters. Expired counters are cleared during subsequent rate-limit checks after a one-day grace period. Hosting logs may contain additional technical information under the host’s retention settings.
       </p>
 
       <h2>How long we keep it</h2>
       <p>
         <em>
-          [NEEDS OWNER INPUT: how long applications are retained — e.g.
-          &ldquo;applications that do not result in a tenancy are deleted after
-          12 months.&rdquo; Illinois has no fixed rule, but keeping applicant
-          data indefinitely increases both risk and obligation. Pick a period
-          and hold to it.]
+          [NEEDS OWNER INPUT: application-retention period, deletion process, and any legal recordkeeping exceptions.]
         </em>
       </p>
 
       <h2>How we protect it</h2>
       <p>
         Applications are transmitted over an encrypted HTTPS connection and
-        stored in a database that is not publicly reachable. The admin dashboard
+        stored in an access-controlled database. The admin dashboard
         is password protected and is not indexed by search engines. No system is
         perfectly secure, but we do not collect Social Security numbers through
         this site specifically to limit what a breach could expose.
       </p>
       <p>
         If a breach affecting personal information occurs, we will notify
-        affected Illinois residents as required by the Illinois Personal
-        Information Protection Act.
+        affected people and authorities as required by applicable law.
       </p>
 
       <h2>Your choices</h2>

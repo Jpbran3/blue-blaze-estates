@@ -18,7 +18,11 @@ export default function LegalPage({
   return (
     <>
       <Header />
+<<<<<<< Updated upstream
       <main id="main-content" tabIndex={-1} className="max-w-3xl mx-auto px-6 py-12 focus:outline-none">
+=======
+      <main id="main-content" tabIndex={-1} className="w-full min-w-0 max-w-3xl mx-auto px-6 py-12 focus:outline-none">
+>>>>>>> Stashed changes
         <div className="mb-8">
           <Link
             href="/"
@@ -43,7 +47,7 @@ export default function LegalPage({
         </div>
 
         <article
-          className="bg-white rounded-2xl shadow-md p-8 md:p-10
+          className="bg-white rounded-2xl shadow-md p-5 sm:p-8 md:p-10
             [&_h2]:font-display [&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-gray-900 [&_h2]:mt-10 [&_h2]:mb-3
             [&_h3]:font-semibold [&_h3]:text-gray-900 [&_h3]:mt-6 [&_h3]:mb-2
             [&_p]:text-gray-700 [&_p]:leading-relaxed [&_p]:mb-4

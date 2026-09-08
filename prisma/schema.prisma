@@ -92,8 +92,16 @@ model Application {
   listing                    Listing? @relation(fields: [listingId], references: [id], onDelete: SetNull)
   rentPrice                  Float?
   status                     String   @default("new")
+  manualReviewRequested      Boolean  @default(false)
   aiScore                    Int?
   aiSummary                  String?
   archived                   Boolean  @default(false)
   createdAt                  DateTime @default(now())
+}
+
+model RateLimit {
+  key String @id
+  attempts Int
+  resetAt BigInt
+  @@index([resetAt])
 }

@@ -31,7 +31,7 @@ export default function TermsPage() {
 
       <h2>Applying</h2>
       <p>
-        There is no fee to apply. When you submit an application you agree that
+        When you submit an application you agree that
         the information you provide is true and complete to the best of your
         knowledge, and you authorize us to contact the employers and landlords
         you list in order to verify it. Submitting an application does not
@@ -74,9 +74,7 @@ export default function TermsPage() {
 
       <h2>Our content</h2>
       <p>
-        The text, photographs, and logo on this site belong to us or are used
-        with permission. You may not reproduce them for commercial purposes
-        without our written consent. Property photographs are intended to be
+        Rights in text, photographs, logos, and other materials remain with their respective rights holders. Contact us before reproducing materials from this site. Property photographs are intended to be
         representative; individual units may differ.
       </p>
 
@@ -109,13 +107,7 @@ export default function TermsPage() {
       <h2>Disputes</h2>
       <p>
         <em>
-          [NEEDS ATTORNEY REVIEW — do not publish as-is] This section is
-          intentionally left for counsel to draft. An arbitration and
-          class-action-waiver clause is common here, but its enforceability
-          against housing applicants and tenants varies, and a poorly drafted
-          one can be worse than none at all. Until counsel advises, the default
-          is simply that disputes are resolved in the state or federal courts
-          located in Williamson County, Illinois.
+          [NEEDS ATTORNEY REVIEW: determine appropriate dispute-resolution terms for this website. No arbitration agreement, class-action waiver, or exclusive court venue is established by this placeholder.]
         </em>
       </p>
 

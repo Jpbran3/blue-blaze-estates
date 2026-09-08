@@ -84,8 +84,9 @@ Weak: no employer listed.
 Boost: spouse income also present.
 
 RULE 3 — RENTAL HISTORY (roughly 45% of base score):
-Strong: current AND previous landlord with phone numbers.
-Moderate: only one landlord provided.
+The landlord fields are yes/no flags — the landlords' own names and phone numbers are withheld from you because they are third parties' personal data. Score only on whether a contactable reference was supplied.
+Strong: current AND previous landlord provided, both with a phone.
+Moderate: only one landlord provided, or landlords provided without phones.
 Weak: no landlord information at all.
 
 RULE 4 — CRIMINAL HISTORY:
@@ -118,41 +119,43 @@ function buildUserMessage(
   app: ApplicationData,
   rentPrice?: number | null
 ): string {
+  // MINIMAL PAYLOAD — this list is the whole basis of the score, and the privacy
+  // policy describes it to applicants. Keep the two in sync: if you add a field
+  // here, update app/privacy-policy/page.tsx in the same change.
+  //
+  // Deliberately WITHHELD, and why:
+  //   - Identity and contact (name, address, phone, email, spouse name): no
+  //     scoring rule uses them, and a name or address is exactly the kind of
+  //     signal a model could use to infer race, national origin, or familial
+  //     status. Withholding them is what makes the system-prompt prohibition
+  //     enforceable rather than aspirational.
+  //   - Household composition (occupant count, other adults): familial status is
+  //     a protected class. Kept in the dashboard for the owner's occupancy
+  //     check, never sent for scoring.
+  //   - Free-text notes ("Interest/Notes"): applicant-authored prose that can
+  //     volunteer protected characteristics (disability, family, religion) with
+  //     no scoring value.
   const fields: [string, string | null | undefined][] = [
-    ["Applicant Name", app.applicantName],
-    ["Present Address", app.presentAddress],
-    ["Town/State/Zip", app.townStateZip],
-    ["Phone", app.phone],
-    ["Email", app.email],
     ["Rent Price (monthly)", rentPrice != null ? String(rentPrice) : null],
+    // Employment & income — Rule 2
     ["Employer", app.employer],
-    ["Employer Address", app.employerAddress],
-    ["Employer Town/State/Zip", app.employerTownStateZip],
-    ["Employer Phone", app.employerPhone],
     ["Employment Duration", app.employmentDuration],
     ["Monthly Wages", app.monthlyWages],
     ["Previous Employer", app.previousEmployer],
-    ["Spouse Name", app.spouseName],
     ["Spouse Employer", app.spouseEmployer],
-    ["Spouse Employer Address", app.spouseEmployerAddress],
-    ["Spouse Employer Town/State/Zip", app.spouseEmployerTownStateZip],
-    ["Spouse Employer Phone", app.spouseEmployerPhone],
     ["Spouse Employment Duration", app.spouseEmploymentDuration],
     ["Spouse Monthly Wages", app.spouseMonthlyWages],
     ["Spouse Previous Employer", app.spousePreviousEmployer],
-    // Household composition is deliberately withheld from the model. Familial
-    // status is a protected class; occupant count and other-adult names are for
-    // the owner's occupancy check in the dashboard, not for scoring.
-    ["Current Landlord", app.currentLandlord],
-    ["Current Landlord Phone", app.currentLandlordPhone],
+    // Rental history — Rule 3. Landlord phone presence is what the rule scores.
+    ["Current Landlord Provided", app.currentLandlord ? "yes" : "no"],
+    ["Current Landlord Phone Provided", app.currentLandlordPhone ? "yes" : "no"],
     ["Current Tenancy Duration", app.currentTenancyDuration],
     ["Current Rent Amount", app.currentRentAmount],
-    ["Previous Landlord", app.previousLandlord],
-    ["Previous Landlord Phone", app.previousLandlordPhone],
-    ["Previous Address Rented", app.previousAddressRented],
+    ["Previous Landlord Provided", app.previousLandlord ? "yes" : "no"],
+    ["Previous Landlord Phone Provided", app.previousLandlordPhone ? "yes" : "no"],
     ["Previous Rent Amount", app.previousRentAmount],
+    // Criminal history — Rule 4. Disclosed in the privacy policy.
     ["Felony History", app.felonyHistory],
-    ["Interest/Notes", app.interest],
   ];
 
   const lines = fields.map(

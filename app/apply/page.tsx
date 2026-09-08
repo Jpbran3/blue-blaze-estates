@@ -621,12 +621,14 @@ function ApplyForm() {
             How your application is reviewed.
           </strong>{" "}
           Blue Blaze Estates uses an automated tool to produce a preliminary
-          score and summary of each application based on the information you
-          provide above. That score is only a starting point — a person at Blue
-          Blaze Estates reviews every application and makes the final decision.
-          No application is approved or denied automatically. If you would like
-          your application reviewed without the automated tool, or you want to
-          know why a decision was made, contact us at{" "}
+          score and summary of each application. It considers your employment,
+          income, rental history and your answer to the criminal-history
+          question; it is not given your name, address, contact details, or who
+          would live in the home. That score is only a starting point — a person
+          at Blue Blaze Estates reviews every application and makes the final
+          decision. No application is approved or denied automatically. You may
+          ask us to set the automated summary aside and assess your application
+          manually, or to explain a decision, at{" "}
           <a
             href="mailto:blueblazeestates@gmail.com"
             className="text-blue-900 underline underline-offset-2 hover:text-blue-700"
@@ -697,7 +699,7 @@ export default function ApplyPage() {
   return (
     <>
       <Header />
-      <main id="main-content" className="max-w-3xl mx-auto px-6 py-12">
+      <main id="main-content" tabIndex={-1} className="max-w-3xl mx-auto px-6 py-12 focus:outline-none">
         <div className="mb-8">
           <Link
             href="/"

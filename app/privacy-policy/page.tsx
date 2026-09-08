@@ -64,25 +64,39 @@ export default function PrivacyPolicyPage() {
       <h2>Automated review of applications</h2>
       <p>
         We use an automated tool to produce a preliminary score and written
-        summary of each application, based only on the employment, income, and
-        rental-history information you provide and the rent of the unit you
-        applied for. Information about your household — how many people would
-        live in the home, or who they are — is deliberately excluded from that
-        automated review.
+        summary of each application. It runs automatically when you submit.
+      </p>
+      <p>
+        <strong>Exactly what is sent to that tool:</strong> the monthly rent of
+        the unit you applied for; your employer, how long you have been there,
+        your stated monthly wages, and your previous employer; the same
+        employment details for your spouse if you provided them; how long you
+        have lived at your current address and what you pay there and paid
+        previously; whether you supplied a current and previous landlord and a
+        phone number for each; and your answer to the criminal-history question.
+      </p>
+      <p>
+        <strong>What is deliberately withheld from it:</strong> your name,
+        address, phone number and email; your spouse&apos;s name; how many people
+        would live in the home and who they are; the names and phone numbers of
+        the landlords you list; and any free-text notes. Your driver&apos;s
+        licence number and date of birth are never sent.
       </p>
       <p>
         <strong>
           The score does not decide anything. A person at Blue Blaze Estates
           reviews every application and makes the final decision.
         </strong>{" "}
-        You may ask us to review your application without the automated tool, or
-        ask why a decision was made, by contacting us using the details below.
-        We will review it manually on request.
+        Because the tool runs at the moment you submit, we cannot prevent it from
+        producing a summary — but you may ask us to set that summary aside and
+        assess your application manually, and to explain any decision. Contact us
+        using the details below and we will do so.
       </p>
       <p>
-        To produce that summary, the information you submit is sent to our
-        service provider Anthropic, PBC, which operates the automated tool. It
-        is used to generate your summary and is not used to train their models.
+        To produce that summary, the information listed above — and only that
+        information — is sent to our service provider Anthropic, PBC, which
+        operates the automated tool. It is used to generate your summary and is
+        not used to train their models.
       </p>
 
       <h2>Who else your information reaches</h2>

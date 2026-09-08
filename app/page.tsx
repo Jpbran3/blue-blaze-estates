@@ -40,7 +40,7 @@ export default async function HomePage() {
     <>
       <Header />
 
-      <main id="main-content">
+      <main id="main-content" tabIndex={-1} className="focus:outline-none">
       <HeroCarousel />
 
       {/* Features strip */}

@@ -18,7 +18,7 @@ export default function LegalPage({
   return (
     <>
       <Header />
-      <main id="main-content" className="max-w-3xl mx-auto px-6 py-12">
+      <main id="main-content" tabIndex={-1} className="max-w-3xl mx-auto px-6 py-12 focus:outline-none">
         <div className="mb-8">
           <Link
             href="/"

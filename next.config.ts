@@ -1,13 +1,25 @@
 import type { NextConfig } from "next";
 
-// Content-Security-Policy. The site loads no third-party scripts, pixels, or
-// analytics — everything is first-party — so this can stay tight. Two carve-outs
-// are unavoidable:
-//   - 'unsafe-inline' on style-src: Tailwind v4 and next/font inject inline
-//     <style> at runtime.
-//   - blob:/data: on img-src: the listing lightbox and next/image use them.
-// If a third-party script is ever added, it must be allow-listed HERE rather
-// than by loosening script-src to 'unsafe-inline' — see AGENTS.md §2.
+// Content-Security-Policy — an ALLOWLIST policy, not a nonce or hash policy.
+//
+// Be precise about what this does and does not buy, because the difference
+// matters: `script-src` includes 'unsafe-inline', so this CSP does NOT stop an
+// injected inline <script>. What it does do is confine script, style, image,
+// font and connection sources to this origin (plus Vercel Blob for listing
+// images), forbid framing, and forbid plugins and <base> rewriting.
+//
+// The stronger nonce + 'strict-dynamic' policy was implemented, tested, and
+// removed: Next.js only injects nonces into per-request renders, so this site's
+// statically prerendered pages get none and every script is blocked. Measured:
+// /privacy-policy produced 10 CSP violations and no hydration. See proxy.ts for
+// the full finding. Making that policy viable would mean forcing dynamic
+// rendering on every page — an architectural change, not a compliance repair.
+//
+// Carve-outs that are load-bearing:
+//   - 'unsafe-inline' on script-src: Next's inline bootstrap/hydration scripts.
+//   - 'unsafe-inline' on style-src: Tailwind v4 and next/font inline styles.
+//   - blob:/data: on img-src: the listing lightbox and next/image.
+// If a third-party script is ever added, allow-list its exact origin HERE.
 const CSP = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline'",

@@ -94,6 +94,19 @@ model Application {
   status                     String   @default("new")
   aiScore                    Int?
   aiSummary                  String?
+  /// Applicant asked for a human-only review. When true the automated screening
+  /// is skipped entirely — on submission and on every later admin edit.
+  manualReviewRequested      Boolean  @default(false)
   archived                   Boolean  @default(false)
   createdAt                  DateTime @default(now())
+}
+
+/// Rate-limit counters. Shared across serverless instances, so limits actually
+/// hold. Stores a SHA-256 of scope+IP, never a raw IP address.
+model RateLimit {
+  key      String @id
+  attempts Int
+  resetAt  BigInt
+
+  @@index([resetAt])
 }

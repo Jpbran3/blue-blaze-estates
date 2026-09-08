@@ -74,10 +74,18 @@ export default function TermsPage() {
 
       <h2>Our content</h2>
       <p>
-        The text, photographs, and logo on this site belong to us or are used
-        with permission. You may not reproduce them for commercial purposes
-        without our written consent. Property photographs are intended to be
-        representative; individual units may differ.
+        <em>
+          [NEEDS OWNER CONFIRMATION: asset ownership] The previous wording
+          asserted that we own or hold permission for every photograph, icon and
+          font on this site. No licence record exists in the project to support
+          that, so it has been removed rather than restated. Confirm the
+          provenance of the property photographs and the logo, and this section
+          can state it accurately.
+        </em>
+      </p>
+      <p>
+        Property photographs are intended to be representative; individual units
+        may differ.
       </p>
 
       <h2>No warranty</h2>
@@ -109,13 +117,13 @@ export default function TermsPage() {
       <h2>Disputes</h2>
       <p>
         <em>
-          [NEEDS ATTORNEY REVIEW — do not publish as-is] This section is
-          intentionally left for counsel to draft. An arbitration and
-          class-action-waiver clause is common here, but its enforceability
-          against housing applicants and tenants varies, and a poorly drafted
-          one can be worse than none at all. Until counsel advises, the default
-          is simply that disputes are resolved in the state or federal courts
-          located in Williamson County, Illinois.
+          [NEEDS ATTORNEY REVIEW — not yet drafted] No dispute-resolution terms
+          are in effect. This section is reserved for language drafted by a
+          licensed Illinois attorney. Arbitration clauses, class-action waivers,
+          and venue-selection clauses are commonly placed here, but their
+          enforceability against housing applicants and tenants varies, and a
+          poorly drafted clause can be worse than none. Nothing in this section
+          limits any right or remedy you have under law.
         </em>
       </p>
 

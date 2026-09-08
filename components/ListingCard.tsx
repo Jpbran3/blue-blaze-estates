@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 
 interface ListingCardProps {
@@ -29,6 +29,8 @@ export default function ListingCard({
     images && images.length > 0 ? images : imageUrl ? [imageUrl] : [];
   const mainImage = allImages[0] ?? null;
 
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const openerRef = useRef<HTMLElement | null>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -42,16 +44,13 @@ export default function ListingCard({
 
   useEffect(() => {
     if (!lightboxOpen) return;
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") setLightboxOpen(false);
-      if (e.key === "ArrowRight") next();
-      if (e.key === "ArrowLeft") prev();
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [lightboxOpen, next, prev]);
+    const dialog = dialogRef.current;
+    dialog?.showModal();
+    return () => { dialog?.close(); openerRef.current?.focus(); };
+  }, [lightboxOpen]);
 
   function openLightbox(index: number) {
+    openerRef.current = document.activeElement as HTMLElement;
     setActiveIndex(index);
     setLightboxOpen(true);
   }
@@ -127,10 +126,15 @@ export default function ListingCard({
 
       {/* Lightbox */}
       {lightboxOpen && allImages.length > 0 && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
-          onClick={() => setLightboxOpen(false)}
-          role="dialog"
+        <dialog
+          ref={dialogRef}
+          className="fixed inset-0 m-0 z-50 flex h-[100dvh] w-screen max-h-none max-w-none items-center justify-center bg-black/90 backdrop:bg-black/90 p-0"
+          onClick={e => { if (e.target === e.currentTarget) setLightboxOpen(false); }}
+          onCancel={() => setLightboxOpen(false)}
+          onKeyDown={e => {
+            if (e.key === "ArrowRight") { e.preventDefault(); next(); }
+            if (e.key === "ArrowLeft") { e.preventDefault(); prev(); }
+          }}
           aria-modal="true"
           aria-label={`Photo gallery for ${title}`}
         >
@@ -139,7 +143,8 @@ export default function ListingCard({
             type="button"
             onClick={() => setLightboxOpen(false)}
             className="absolute top-3 right-3 flex h-11 w-11 items-center justify-center rounded-full text-white/80 hover:text-white hover:bg-white/10 text-3xl leading-none z-10 cursor-pointer transition-colors"
-            aria-label="Close"
+            aria-label="Close photo gallery"
+            autoFocus
           >
             ×
           </button>
@@ -165,14 +170,14 @@ export default function ListingCard({
 
           {/* Image */}
           <div
-            className="max-w-4xl max-h-[85vh] px-16"
+            className="max-w-4xl max-h-[65vh] px-12 sm:px-16"
             onClick={(e) => e.stopPropagation()}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={allImages[activeIndex]}
               alt={`${title} — photo ${activeIndex + 1}`}
-              className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+              className="max-w-full max-h-[65vh] object-contain rounded-lg shadow-2xl"
             />
           </div>
 
@@ -191,7 +196,7 @@ export default function ListingCard({
           {/* Thumbnail strip */}
           {allImages.length > 1 && (
             <div
-              className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2"
+              className="absolute bottom-4 left-1/2 -translate-x-1/2 flex max-w-[90vw] overflow-x-auto gap-2 p-2"
               onClick={(e) => e.stopPropagation()}
             >
               {allImages.map((url, i) => (
@@ -200,7 +205,7 @@ export default function ListingCard({
                   type="button"
                   onClick={() => setActiveIndex(i)}
                   aria-label={`View photo ${i + 1}`}
-                  className={`w-12 h-12 rounded overflow-hidden border-2 transition-all cursor-pointer ${
+                  className={`w-12 h-12 shrink-0 rounded overflow-hidden border-2 transition-all cursor-pointer ${
                     i === activeIndex ? "border-white scale-110" : "border-white/30 opacity-60 hover:opacity-100"
                   }`}
                 >
@@ -210,7 +215,7 @@ export default function ListingCard({
               ))}
             </div>
           )}
-        </div>
+        </dialog>
       )}
     </>
   );

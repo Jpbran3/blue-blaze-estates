@@ -76,10 +76,12 @@ export async function PUT(
     data: updateData,
   });
 
-  // Re-run AI screening whenever content fields are edited.
-  // Always runs — status/archived-only updates don't contain any EDITABLE_FIELDS.
+  // Re-run AI screening whenever content fields are edited — unless the
+  // applicant asked for a human-only review. Honouring that preference on
+  // submission but silently re-screening on the next admin edit would break the
+  // promise made on the form and in the privacy policy.
   const hasContentChanges = EDITABLE_FIELDS.some((f) => f in body);
-  if (hasContentChanges) {
+  if (hasContentChanges && !application.manualReviewRequested) {
     const result = await screenTenant(application, application.rentPrice);
 
     // Only write the new score if the AI call actually succeeded (score > 0).
@@ -93,8 +95,9 @@ export async function PUT(
       return NextResponse.json(rescreened);
     }
 
-    // Screening failed — return the saved field changes but keep old score intact
-    console.error("Re-screening returned error score after admin edit:", result.summary);
+    // Screening failed — return the saved field changes but keep old score
+    // intact. Log the id only: the summary carries the applicant's income.
+    console.error("Re-screening returned an error score after admin edit:", id);
   }
 
   return NextResponse.json(application);

@@ -24,10 +24,19 @@ html {
 
 /* Visible keyboard focus for all interactive elements (accessibility) */
 :focus-visible {
-  outline: 2px solid #1d4ed8;
+  outline: 3px solid #ffffff !important;
   outline-offset: 2px;
-  border-radius: 4px;
+  box-shadow: 0 0 0 5px #111827 !important;
 }
+
+input::placeholder, textarea::placeholder {
+  color: #4b5563;
+  opacity: 1;
+}
+
+main, article, p, li, a { overflow-wrap: anywhere; }
+input, select, textarea { min-width: 0; }
+
 
 /* Respect users who prefer reduced motion */
 @media (prefers-reduced-motion: reduce) {

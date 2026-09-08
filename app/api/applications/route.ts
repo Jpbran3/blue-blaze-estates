@@ -2,9 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { screenTenant } from "@/lib/screenTenant";
 import { isAuthenticated } from "@/lib/adminAuth";
+import { readJsonObject, RequestError } from "@/lib/requestBody";
+import { parseApplication } from "@/lib/applicationInput";
+import { rateLimit } from "@/lib/rateLimit";
 
 export const maxDuration = 60;
-
 
 export async function GET(request: NextRequest) {
   if (!(await isAuthenticated())) {
@@ -26,13 +28,25 @@ export async function GET(request: NextRequest) {
 const RETRYABLE_DB_ERROR =
   /stream not found|connection|timed? ?out|reset|ECONN|closed|unavailable|hyper|broken pipe|EPIPE/i;
 
+/**
+ * Database and provider errors can carry row values, connection strings and
+ * request fragments. Log a stable label plus the error *type* only — never the
+ * message, stack, or any applicant field.
+ */
+function logFailure(label: string, err: unknown) {
+  const kind =
+    err instanceof Error ? err.constructor.name : typeof err;
+  console.error(`${label} (${kind})`);
+}
+
 async function withDbRetry<T>(fn: () => Promise<T>, label: string): Promise<T> {
   try {
     return await fn();
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     if (RETRYABLE_DB_ERROR.test(msg)) {
-      console.error(`${label} hit a transient DB error — retrying once:`, msg);
+      // The matched category is safe to log; the raw message is not.
+      console.error(`${label} hit a transient DB error — retrying once`);
       await new Promise((r) => setTimeout(r, 300));
       return await fn();
     }
@@ -41,29 +55,45 @@ async function withDbRetry<T>(fn: () => Promise<T>, label: string): Promise<T> {
 }
 
 export async function POST(request: NextRequest) {
-  let body: Record<string, unknown>;
+  // Throttle before touching the body: submissions are unauthenticated and
+  // write to the database, so this is the spam and abuse boundary.
   try {
-    body = await request.json();
-  } catch {
+    // 10/hour, not 5: the counter increments on every attempt including
+    // validation failures, and a real applicant filling in a long form can
+    // legitimately retry several times. Still far below any useful spam rate.
+    const limit = await rateLimit(request, "application", 10, 3600);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: "Too many applications submitted. Please try again later." },
+        { status: 429, headers: { "Retry-After": String(limit.retryAfter) } }
+      );
+    }
+  } catch (err) {
+    // A rate-limit outage must not block a genuine applicant.
+    logFailure("Rate limit check failed (allowing request)", err);
+  }
+
+  // Parse and validate. parseApplication allow-lists fields, so removed fields
+  // (ssn, spouseSsn, childrenResiding) and admin-only fields (status, aiScore,
+  // archived) are ignored even if a caller submits them.
+  let input: ReturnType<typeof parseApplication>;
+  try {
+    const body = await readJsonObject(request);
+    input = parseApplication(body);
+  } catch (err) {
+    if (err instanceof RequestError) {
+      return NextResponse.json({ error: err.message }, { status: err.status });
+    }
+    logFailure("Application parse failed", err);
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
   }
 
-  const applicantName = body.applicantName as string | undefined;
-  const phone = body.phone as string | undefined;
+  const { manualReviewRequested, listingId: rawListingId, ...fields } = input;
 
   // Normalize listingId: the form sends "" when no unit is selected. An empty
   // string (or any id that doesn't match a real listing) would violate the
   // Listing foreign key and make the insert fail, so coerce those to null.
-  const rawListingId = (body.listingId as string | null | undefined) ?? null;
-  let listingId: string | null =
-    rawListingId && rawListingId.trim() !== "" ? rawListingId.trim() : null;
-
-  if (!applicantName || !phone) {
-    return NextResponse.json(
-      { error: "applicantName and phone are required" },
-      { status: 400 }
-    );
-  }
+  let listingId: string | null = rawListingId;
 
   // Look up the unit's rent for screening, and verify the listing actually
   // exists — if it doesn't, drop the link rather than fail the foreign key.
@@ -81,12 +111,10 @@ export async function POST(request: NextRequest) {
         listingId = null; // referenced unit no longer exists
       }
     } catch (err) {
-      console.error("Listing lookup failed (saving without listing link):", err);
+      logFailure("Listing lookup failed (saving without listing link)", err);
       listingId = null;
     }
   }
-
-  const str = (key: string) => (body[key] as string | undefined) ?? null;
 
   // 1) Save the application. This is the only step allowed to fail the request.
   let application;
@@ -95,88 +123,57 @@ export async function POST(request: NextRequest) {
       () =>
         prisma.application.create({
           data: {
-            applicantName,
-            phone,
+            ...fields,
             listingId,
             rentPrice,
-            presentAddress: str("presentAddress"),
-            townStateZip: str("townStateZip"),
-            // SSN is deliberately NOT collected or stored. The columns remain in
-            // the schema only so existing rows aren't dropped — never write to
-            // them, and never add an ssn field back to the public form.
-            driversLicense: str("driversLicense"),
-            birthDate: str("birthDate"),
-            employer: str("employer"),
-            employerAddress: str("employerAddress"),
-            employerTownStateZip: str("employerTownStateZip"),
-            employerPhone: str("employerPhone"),
-            employmentDuration: str("employmentDuration"),
-            monthlyWages: str("monthlyWages"),
-            previousEmployer: str("previousEmployer"),
-            spouseName: str("spouseName"),
-            spouseDriversLicense: str("spouseDriversLicense"),
-            spouseBirthDate: str("spouseBirthDate"),
-            spouseEmployer: str("spouseEmployer"),
-            spouseEmployerAddress: str("spouseEmployerAddress"),
-            spouseEmployerTownStateZip: str("spouseEmployerTownStateZip"),
-            spouseEmployerPhone: str("spouseEmployerPhone"),
-            spouseEmploymentDuration: str("spouseEmploymentDuration"),
-            spouseMonthlyWages: str("spouseMonthlyWages"),
-            spousePreviousEmployer: str("spousePreviousEmployer"),
-            // Occupant count replaces the old children names/ages field —
-            // familial status is protected under the Fair Housing Act.
-            occupantCount: str("occupantCount"),
-            adultsResiding: str("adultsResiding"),
-            currentLandlord: str("currentLandlord"),
-            currentLandlordPhone: str("currentLandlordPhone"),
-            currentTenancyDuration: str("currentTenancyDuration"),
-            currentRentAmount: str("currentRentAmount"),
-            previousLandlord: str("previousLandlord"),
-            previousLandlordPhone: str("previousLandlordPhone"),
-            previousAddressRented: str("previousAddressRented"),
-            previousRentAmount: str("previousRentAmount"),
-            felonyHistory: str("felonyHistory"),
-            interest: str("interest"),
-            electronicSignature: str("electronicSignature"),
-            signatureDate: str("signatureDate"),
+            manualReviewRequested,
+            // ssn / spouseSsn / childrenResiding are intentionally never written.
+            // The columns remain only so existing rows are not destroyed.
           },
         }),
       "application create"
     );
   } catch (err) {
-    console.error(
-      "Application create failed:",
-      err instanceof Error ? err.stack ?? err.message : err
-    );
+    logFailure("Application create failed", err);
     return NextResponse.json(
       { error: "We couldn't save your application. Please try again." },
       { status: 503 }
     );
   }
 
-  // 2) AI screening is best-effort. A saved application must NEVER be reported
-  //    to the applicant as a failure just because screening/update hiccuped.
-  try {
-    const result = await screenTenant(application, rentPrice);
-    if (result.score > 0) {
-      const updated = await withDbRetry(
-        () =>
-          prisma.application.update({
-            where: { id: application.id },
-            data: { aiScore: result.score, aiSummary: result.summary },
-          }),
-        "application screening update"
-      );
-      return NextResponse.json(updated, { status: 201 });
+  // 2) Automated screening — skipped entirely when the applicant asked for a
+  //    human-only review. Nothing about their application is sent to the model.
+  if (!manualReviewRequested) {
+    try {
+      const result = await screenTenant(application, rentPrice);
+      if (result.score > 0) {
+        await withDbRetry(
+          () =>
+            prisma.application.update({
+              where: { id: application.id },
+              data: { aiScore: result.score, aiSummary: result.summary },
+            }),
+          "application screening update"
+        );
+      } else {
+        console.error("Screening returned an error score for application:", application.id);
+      }
+    } catch (err) {
+      // Screening is best-effort: a saved application must never be reported to
+      // the applicant as a failure because screening hiccuped.
+      logFailure("Screening/update failed (application still saved)", err);
     }
-    // Log the id only — the summary carries the applicant's income figures.
-    console.error(
-      "Screening returned an error score for application:",
-      application.id
-    );
-  } catch (err) {
-    console.error("Screening/update failed (application still saved):", err);
   }
 
-  return NextResponse.json(application, { status: 201 });
+  // Minimal receipt. The applicant's browser has no need for the stored row or
+  // the internal screening score/summary, and returning them would leak the
+  // preliminary assessment to the person being assessed.
+  return NextResponse.json(
+    {
+      id: application.id,
+      received: true,
+      manualReviewRequested,
+    },
+    { status: 201 }
+  );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -70,26 +70,53 @@ function SectionHeader({ children }: { children: React.ReactNode }) {
   );
 }
 
+/**
+ * The wrapping <label> already names the control. What was missing was the
+ * error wiring: the message sat outside the label with nothing tying it to the
+ * input, so a screen reader user landing on the field was told it was invalid by
+ * colour alone. The control now carries aria-invalid and aria-describedby
+ * pointing at the message.
+ */
 function Field({
   label,
   required,
   error,
+  fieldId,
   children,
 }: {
   label: string;
   required?: boolean;
   error?: string;
+  fieldId?: string;
   children: React.ReactNode;
 }) {
+  const errorId = error && fieldId ? `${fieldId}-error` : undefined;
+  const control =
+    React.isValidElement(children) && errorId
+      ? React.cloneElement(children as React.ReactElement<Record<string, unknown>>, {
+          "aria-invalid": true,
+          "aria-describedby": errorId,
+        })
+      : children;
+
   return (
     <div>
       <label className="block text-sm font-medium text-gray-700">
         <span className="mb-1 inline-block">
-          {label} {required && <span className="text-red-700">*</span>}
+          {label}{" "}
+          {required && (
+            <span className="text-red-700">
+              *<span className="sr-only"> (required)</span>
+            </span>
+          )}
         </span>
-        <span className="block font-normal">{children}</span>
+        <span className="block font-normal">{control}</span>
       </label>
-      {error && <p className="text-red-700 text-xs mt-1">{error}</p>}
+      {error && (
+        <p id={errorId} className="text-red-700 text-xs mt-1">
+          {error}
+        </p>
+      )}
     </div>
   );
 }
@@ -116,6 +143,8 @@ function ApplyForm() {
   const [cities, setCities] = useState<City[]>([]);
   const [listings, setListings] = useState<Listing[]>([]);
   const [selectedCitySlug, setSelectedCitySlug] = useState("");
+  const [manualReviewRequested, setManualReviewRequested] = useState(false);
+  const errorSummaryRef = React.useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     fetch("/api/cities")
@@ -157,6 +186,9 @@ function ApplyForm() {
     const errs = validate();
     if (Object.keys(errs).length > 0) {
       setErrors(errs);
+      // Without moving focus, a screen reader user gets no notification that
+      // submission failed — the page simply does nothing.
+      requestAnimationFrame(() => errorSummaryRef.current?.focus());
       return;
     }
     setErrors({});
@@ -165,7 +197,7 @@ function ApplyForm() {
       const res = await fetch("/api/applications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, signatureDate: today }),
+        body: JSON.stringify({ ...form, signatureDate: today, manualReviewRequested }),
       });
       if (!res.ok) throw new Error("Failed");
       setStatus("success");
@@ -194,8 +226,31 @@ function ApplyForm() {
     );
   }
 
+  const errorCount = Object.values(errors).filter(Boolean).length;
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-2">
+    <form onSubmit={handleSubmit} className="space-y-2" noValidate>
+      {/*
+        Validation summary. role="alert" announces it when it appears, and
+        tabIndex={-1} lets handleSubmit move focus here so the failure is
+        reported rather than silently colouring three fields red.
+      */}
+      <div
+        ref={errorSummaryRef}
+        tabIndex={-1}
+        role="alert"
+        className={`focus:outline-none ${
+          errorCount
+            ? "bg-red-50 border border-red-600 rounded-lg px-4 py-3 text-sm text-red-800 mb-4"
+            : "sr-only"
+        }`}
+      >
+        {errorCount > 0 &&
+          `Your application was not submitted. Please correct ${errorCount} ${
+            errorCount === 1 ? "field" : "fields"
+          } below.`}
+      </div>
+
       <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 text-sm text-blue-900 font-medium mb-6">
         There is no application fee. Complete all sections below and we&apos;ll
         be in touch within one business day.
@@ -205,7 +260,7 @@ function ApplyForm() {
       <SectionHeader>Applicant Information</SectionHeader>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="sm:col-span-2">
-          <Field label="Name" required error={errors.applicantName}>
+          <Field label="Name" required error={errors.applicantName} fieldId="applicantName">
             <input
               type="text"
               value={form.applicantName}
@@ -235,7 +290,7 @@ function ApplyForm() {
             />
           </Field>
         </div>
-        <Field label="Phone #" required error={errors.phone}>
+        <Field label="Phone #" required error={errors.phone} fieldId="phone">
           <input
             type="tel"
             value={form.phone}
@@ -653,12 +708,33 @@ function ApplyForm() {
           </Link>{" "}
           for how we handle the information on this form.
         </p>
+
+        <div className="border-t border-gray-300 pt-3">
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={manualReviewRequested}
+              onChange={(e) => setManualReviewRequested(e.target.checked)}
+              className="mt-0.5 h-5 w-5 shrink-0 rounded border-gray-500 text-blue-900 focus:ring-2 focus:ring-blue-500"
+            />
+            <span>
+              <strong className="font-semibold">
+                Review my application manually instead.
+              </strong>{" "}
+              Tick this and we will not run the automated tool at all — none of
+              your information is sent to it, and a person reviews your
+              application from the start. This does not disadvantage your
+              application.
+            </span>
+          </label>
+        </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
         <Field
           label="Electronic Signature (type your full name)"
           required
           error={errors.electronicSignature}
+          fieldId="electronicSignature"
         >
           <input
             type="text"

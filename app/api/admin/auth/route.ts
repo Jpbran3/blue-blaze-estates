@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   ADMIN_SESSION_COOKIE,
+  SESSION_SECONDS,
   isAuthenticated,
   sessionValue,
   verifyPassword,
 } from "@/lib/adminAuth";
+import { rateLimit } from "@/lib/rateLimit";
+import { readJsonObject, RequestError } from "@/lib/requestBody";
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
@@ -22,11 +25,31 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  // Throttle login attempts. Without this the admin password — the only thing
+  // protecting every applicant's record — can be guessed at network speed.
+  try {
+    const limit = await rateLimit(request, "admin-login", 10, 900);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: "Too many attempts. Please try again later." },
+        { status: 429, headers: { "Retry-After": String(limit.retryAfter) } }
+      );
+    }
+  } catch {
+    // Fail closed: if the throttle cannot be consulted, do not accept a login.
+    return NextResponse.json(
+      { error: "Sign-in is temporarily unavailable." },
+      { status: 503 }
+    );
+  }
+
   let password: unknown;
   try {
-    ({ password } = await request.json());
-  } catch {
-    return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+    const body = await readJsonObject(request, 2048);
+    password = body.password;
+  } catch (err) {
+    const status = err instanceof RequestError ? err.status : 400;
+    return NextResponse.json({ error: "Invalid request body." }, { status });
   }
 
   if (!verifyPassword(password)) {
@@ -43,7 +66,8 @@ export async function POST(request: NextRequest) {
   const response = NextResponse.json({ ok: true });
   response.cookies.set(ADMIN_SESSION_COOKIE, value, {
     ...COOKIE_OPTIONS,
-    maxAge: 60 * 60 * 24 * 7, // 7 days
+    // Mirrors the expiry inside the signed token, which the server enforces.
+    maxAge: SESSION_SECONDS,
   });
   return response;
 }

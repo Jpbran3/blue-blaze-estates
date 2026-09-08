@@ -214,7 +214,7 @@ function ApplyForm() {
         </h2>
         <p className="text-gray-600 mb-6 max-w-md mx-auto">
           Thank you! We&apos;ve received your application and will be in touch
-          within one business day.
+          as soon as we can.
         </p>
         <Link
           href="/"
@@ -253,7 +253,7 @@ function ApplyForm() {
 
       <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 text-sm text-blue-900 font-medium mb-6">
         There is no application fee. Complete all sections below and we&apos;ll
-        be in touch within one business day.
+        be in touch as soon as we can.
       </div>
 
       {/* Applicant Information */}
@@ -799,8 +799,8 @@ export default function ApplyPage() {
             Rental Application
           </h1>
           <p className="text-gray-500 mb-8">
-            Complete all sections and submit. We will contact you within one
-            business day.
+            Complete all sections and submit. We will contact you as soon as
+            we can.
           </p>
           <Suspense fallback={<p className="text-gray-600">Loading form...</p>}>
             <ApplyForm />

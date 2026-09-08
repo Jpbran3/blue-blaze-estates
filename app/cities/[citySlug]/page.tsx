@@ -53,7 +53,7 @@ export default async function CityPage({ params }: Props) {
   return (
     <>
       <Header />
-      <main className="max-w-6xl mx-auto px-6 py-12">
+      <main id="main-content" className="max-w-6xl mx-auto px-6 py-12">
         {/* Breadcrumb */}
         <nav className="text-sm text-gray-500 mb-6">
           <Link href="/" className="hover:text-gray-800">

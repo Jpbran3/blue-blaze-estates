@@ -34,7 +34,6 @@ interface Application {
   presentAddress?: string | null;
   townStateZip?: string | null;
   phone: string;
-  ssn?: string | null;
   driversLicense?: string | null;
   birthDate?: string | null;
   employer?: string | null;
@@ -47,7 +46,6 @@ interface Application {
   spouseName?: string | null;
   spouseDriversLicense?: string | null;
   spouseBirthDate?: string | null;
-  spouseSsn?: string | null;
   spouseEmployer?: string | null;
   spouseEmployerAddress?: string | null;
   spouseEmployerTownStateZip?: string | null;
@@ -55,7 +53,7 @@ interface Application {
   spouseEmploymentDuration?: string | null;
   spouseMonthlyWages?: string | null;
   spousePreviousEmployer?: string | null;
-  childrenResiding?: string | null;
+  occupantCount?: string | null;
   adultsResiding?: string | null;
   currentLandlord?: string | null;
   currentLandlordPhone?: string | null;
@@ -88,7 +86,6 @@ const APPLICATION_FIELDS: [string, keyof Application][] = [
   ["Interest / Unit", "interest"],
   ["Present Address", "presentAddress"],
   ["Town, State, Zip", "townStateZip"],
-  ["SSN", "ssn"],
   ["Driver's License #", "driversLicense"],
   ["Birth Date", "birthDate"],
   ["Employer", "employer"],
@@ -101,7 +98,6 @@ const APPLICATION_FIELDS: [string, keyof Application][] = [
   ["Spouse Name", "spouseName"],
   ["Spouse DL #", "spouseDriversLicense"],
   ["Spouse Birth Date", "spouseBirthDate"],
-  ["Spouse SSN", "spouseSsn"],
   ["Spouse Employer", "spouseEmployer"],
   ["Spouse Employer Address", "spouseEmployerAddress"],
   ["Spouse Employer Town/State/Zip", "spouseEmployerTownStateZip"],
@@ -109,7 +105,7 @@ const APPLICATION_FIELDS: [string, keyof Application][] = [
   ["Spouse Employment Duration", "spouseEmploymentDuration"],
   ["Spouse Monthly Wages", "spouseMonthlyWages"],
   ["Spouse Previous Employer", "spousePreviousEmployer"],
-  ["Children Residing", "childrenResiding"],
+  ["Total Occupants", "occupantCount"],
   ["Other Adults Residing", "adultsResiding"],
   ["Current Landlord", "currentLandlord"],
   ["Current Landlord Phone", "currentLandlordPhone"],

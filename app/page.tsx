@@ -40,6 +40,7 @@ export default async function HomePage() {
     <>
       <Header />
 
+      <main id="main-content">
       <HeroCarousel />
 
       {/* Features strip */}
@@ -148,6 +149,7 @@ export default async function HomePage() {
           </Link>
         </div>
       </section>
+      </main>
 
       <Footer />
     </>

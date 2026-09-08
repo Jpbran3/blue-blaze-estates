@@ -43,6 +43,9 @@ model Application {
   presentAddress             String?
   townStateZip               String?
   phone                      String
+  /// DEPRECATED — no longer collected or written. Retained so existing rows are
+  /// not destroyed by a migration. Purge with `npm run db:purge-ssn` once the
+  /// owner has confirmed, then drop the column in a follow-up migration.
   ssn                        String?
   driversLicense             String?
   birthDate                  String?
@@ -56,6 +59,7 @@ model Application {
   spouseName                 String?
   spouseDriversLicense       String?
   spouseBirthDate            String?
+  /// DEPRECATED — see `ssn` above. No longer collected or written.
   spouseSsn                  String?
   spouseEmployer             String?
   spouseEmployerAddress      String?
@@ -64,7 +68,12 @@ model Application {
   spouseEmploymentDuration   String?
   spouseMonthlyWages         String?
   spousePreviousEmployer     String?
+  /// DEPRECATED — replaced by `occupantCount`. Collecting names and ages of
+  /// children invites a familial-status (Fair Housing Act) claim. Retained only
+  /// so existing rows survive; never write to it.
   childrenResiding           String?
+  /// Total household size — what an occupancy standard actually needs.
+  occupantCount              String?
   adultsResiding             String?
   currentLandlord            String?
   currentLandlordPhone       String?

@@ -25,7 +25,6 @@ const EMPTY_FORM = {
   presentAddress: "",
   townStateZip: "",
   phone: "",
-  ssn: "",
   driversLicense: "",
   birthDate: "",
   employer: "",
@@ -38,7 +37,6 @@ const EMPTY_FORM = {
   spouseName: "",
   spouseDriversLicense: "",
   spouseBirthDate: "",
-  spouseSsn: "",
   spouseEmployer: "",
   spouseEmployerAddress: "",
   spouseEmployerTownStateZip: "",
@@ -46,7 +44,7 @@ const EMPTY_FORM = {
   spouseEmploymentDuration: "",
   spouseMonthlyWages: "",
   spousePreviousEmployer: "",
-  childrenResiding: "",
+  occupantCount: "",
   adultsResiding: "",
   currentLandlord: "",
   currentLandlordPhone: "",
@@ -87,18 +85,18 @@ function Field({
     <div>
       <label className="block text-sm font-medium text-gray-700">
         <span className="mb-1 inline-block">
-          {label} {required && <span className="text-red-500">*</span>}
+          {label} {required && <span className="text-red-700">*</span>}
         </span>
         <span className="block font-normal">{children}</span>
       </label>
-      {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+      {error && <p className="text-red-700 text-xs mt-1">{error}</p>}
     </div>
   );
 }
 
 const inputCls = (hasError?: boolean) =>
   `w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-    hasError ? "border-red-400 bg-red-50" : "border-gray-300"
+    hasError ? "border-red-600 bg-red-50" : "border-gray-500"
   }`;
 
 function ApplyForm() {
@@ -246,15 +244,6 @@ function ApplyForm() {
             className={inputCls(!!errors.phone)}
           />
         </Field>
-        <Field label="Social Security #">
-          <input
-            type="text"
-            value={form.ssn}
-            onChange={(e) => set("ssn", e.target.value)}
-            placeholder="XXX-XX-XXXX"
-            className={inputCls()}
-          />
-        </Field>
         <Field label="Driver's License #">
           <input
             type="text"
@@ -389,15 +378,6 @@ function ApplyForm() {
                 className={inputCls()}
               />
             </Field>
-            <Field label="Spouse's Social Security #">
-              <input
-                type="text"
-                value={form.spouseSsn}
-                onChange={(e) => set("spouseSsn", e.target.value)}
-                placeholder="XXX-XX-XXXX"
-                className={inputCls()}
-              />
-            </Field>
             <div className="sm:col-span-2">
               <Field label="Spouse's Place of Employment">
                 <input
@@ -475,12 +455,20 @@ function ApplyForm() {
       {/* Household Information */}
       <SectionHeader>Household Information</SectionHeader>
       <div className="space-y-4">
-        <Field label="Names and ages of children residing with you">
-          <textarea
-            value={form.childrenResiding}
-            onChange={(e) => set("childrenResiding", e.target.value)}
-            rows={3}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+        {/*
+          Familial status is a protected class under the Fair Housing Act, so we
+          ask only for the total occupant count — which is what an occupancy
+          standard actually needs — instead of the names and ages of children.
+        */}
+        <Field label="Total number of people who would live in the home (including children)">
+          <input
+            type="number"
+            inputMode="numeric"
+            min={1}
+            value={form.occupantCount}
+            onChange={(e) => set("occupantCount", e.target.value)}
+            placeholder="e.g. 4"
+            className={`${inputCls()} sm:max-w-[12rem]`}
           />
         </Field>
         <Field label="Names of any adult (other than spouse) residing with you">
@@ -488,7 +476,7 @@ function ApplyForm() {
             value={form.adultsResiding}
             onChange={(e) => set("adultsResiding", e.target.value)}
             rows={2}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            className="w-full border border-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
           />
         </Field>
       </div>
@@ -586,7 +574,7 @@ function ApplyForm() {
               set("listingId", "");
               set("interest", "");
             }}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">— Select a city —</option>
             {cities.map((c) => (
@@ -603,7 +591,7 @@ function ApplyForm() {
                 set("listingId", e.target.value);
                 set("interest", listing?.title ?? "");
               }}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">— Select a unit —</option>
               {listings.map((l) => (
@@ -621,10 +609,48 @@ function ApplyForm() {
 
       {/* Disclosure */}
       <SectionHeader>Disclosure</SectionHeader>
-      <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-700">
-        I, the undersigned, represent that the above statements are true and
-        complete. I hereby authorize the disclosure of my credit information to
-        Blue Blaze Estates.
+      <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-700 space-y-3">
+        <p>
+          I represent that the statements in this application are true and
+          complete to the best of my knowledge. I authorize Blue Blaze Estates
+          to contact the employers and landlords I have listed in order to
+          verify this information.
+        </p>
+        <p>
+          <strong className="font-semibold">
+            How your application is reviewed.
+          </strong>{" "}
+          Blue Blaze Estates uses an automated tool to produce a preliminary
+          score and summary of each application based on the information you
+          provide above. That score is only a starting point — a person at Blue
+          Blaze Estates reviews every application and makes the final decision.
+          No application is approved or denied automatically. If you would like
+          your application reviewed without the automated tool, or you want to
+          know why a decision was made, contact us at{" "}
+          <a
+            href="mailto:blueblazeestates@gmail.com"
+            className="text-blue-900 underline underline-offset-2 hover:text-blue-700"
+          >
+            blueblazeestates@gmail.com
+          </a>{" "}
+          or 618-942-7624 and we will review it manually.
+        </p>
+        <p>
+          Blue Blaze Estates is an Equal Housing Opportunity provider. We do not
+          discriminate on the basis of race, color, religion, sex, national
+          origin, familial status, disability, or any other class protected by
+          federal or Illinois law.
+        </p>
+        <p>
+          See our{" "}
+          <Link
+            href="/privacy-policy"
+            className="text-blue-900 underline underline-offset-2 hover:text-blue-700"
+          >
+            Privacy Policy
+          </Link>{" "}
+          for how we handle the information on this form.
+        </p>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
         <Field
@@ -671,7 +697,7 @@ export default function ApplyPage() {
   return (
     <>
       <Header />
-      <main className="max-w-3xl mx-auto px-6 py-12">
+      <main id="main-content" className="max-w-3xl mx-auto px-6 py-12">
         <div className="mb-8">
           <Link
             href="/"
@@ -698,7 +724,7 @@ export default function ApplyPage() {
             Complete all sections and submit. We will contact you within one
             business day.
           </p>
-          <Suspense fallback={<p className="text-gray-400">Loading form...</p>}>
+          <Suspense fallback={<p className="text-gray-600">Loading form...</p>}>
             <ApplyForm />
           </Suspense>
         </div>

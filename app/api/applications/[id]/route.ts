@@ -1,21 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
 import { screenTenant } from "@/lib/screenTenant";
+import { isAuthenticated } from "@/lib/adminAuth";
 
 // Give the function more time on Vercel Pro/Teams (hobby stays at 10s)
 export const maxDuration = 60;
 
-async function isAuthenticated() {
-  const cookieStore = await cookies();
-  const session = cookieStore.get("admin_session");
-  const adminPassword = (process.env.ADMIN_PASSWORD ?? "changeme").trim();
-  return (
-    session?.value ===
-    crypto.createHash("sha256").update(adminPassword).digest("hex")
-  );
-}
 
 const EDITABLE_FIELDS = [
   "applicantName",
@@ -24,7 +14,6 @@ const EDITABLE_FIELDS = [
   "interest",
   "presentAddress",
   "townStateZip",
-  "ssn",
   "driversLicense",
   "birthDate",
   "employer",
@@ -37,7 +26,6 @@ const EDITABLE_FIELDS = [
   "spouseName",
   "spouseDriversLicense",
   "spouseBirthDate",
-  "spouseSsn",
   "spouseEmployer",
   "spouseEmployerAddress",
   "spouseEmployerTownStateZip",
@@ -45,7 +33,7 @@ const EDITABLE_FIELDS = [
   "spouseEmploymentDuration",
   "spouseMonthlyWages",
   "spousePreviousEmployer",
-  "childrenResiding",
+  "occupantCount",
   "adultsResiding",
   "currentLandlord",
   "currentLandlordPhone",

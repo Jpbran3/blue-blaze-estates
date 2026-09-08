@@ -39,6 +39,17 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${playfair.variable} min-h-full flex flex-col bg-gray-50 text-gray-800 antialiased`}
       >
+        {/*
+          Skip link (WCAG 2.1 AA, 2.4.1). Visually hidden until it receives
+          keyboard focus, so keyboard and screen reader users can jump past the
+          header nav straight to the page content.
+        */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-blue-900 focus:shadow-lg focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-blue-700"
+        >
+          Skip to main content
+        </a>
         {children}
       </body>
     </html>

@@ -1,20 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
 import { screenTenant } from "@/lib/screenTenant";
+import { isAuthenticated } from "@/lib/adminAuth";
 
 export const maxDuration = 60;
 
-async function isAuthenticated() {
-  const cookieStore = await cookies();
-  const session = cookieStore.get("admin_session");
-  const adminPassword = (process.env.ADMIN_PASSWORD ?? "changeme").trim();
-  return (
-    session?.value ===
-    crypto.createHash("sha256").update(adminPassword).digest("hex")
-  );
-}
 
 export async function GET(request: NextRequest) {
   if (!(await isAuthenticated())) {
@@ -111,7 +101,9 @@ export async function POST(request: NextRequest) {
             rentPrice,
             presentAddress: str("presentAddress"),
             townStateZip: str("townStateZip"),
-            ssn: str("ssn"),
+            // SSN is deliberately NOT collected or stored. The columns remain in
+            // the schema only so existing rows aren't dropped — never write to
+            // them, and never add an ssn field back to the public form.
             driversLicense: str("driversLicense"),
             birthDate: str("birthDate"),
             employer: str("employer"),
@@ -124,7 +116,6 @@ export async function POST(request: NextRequest) {
             spouseName: str("spouseName"),
             spouseDriversLicense: str("spouseDriversLicense"),
             spouseBirthDate: str("spouseBirthDate"),
-            spouseSsn: str("spouseSsn"),
             spouseEmployer: str("spouseEmployer"),
             spouseEmployerAddress: str("spouseEmployerAddress"),
             spouseEmployerTownStateZip: str("spouseEmployerTownStateZip"),
@@ -132,7 +123,9 @@ export async function POST(request: NextRequest) {
             spouseEmploymentDuration: str("spouseEmploymentDuration"),
             spouseMonthlyWages: str("spouseMonthlyWages"),
             spousePreviousEmployer: str("spousePreviousEmployer"),
-            childrenResiding: str("childrenResiding"),
+            // Occupant count replaces the old children names/ages field —
+            // familial status is protected under the Fair Housing Act.
+            occupantCount: str("occupantCount"),
             adultsResiding: str("adultsResiding"),
             currentLandlord: str("currentLandlord"),
             currentLandlordPhone: str("currentLandlordPhone"),
@@ -176,7 +169,11 @@ export async function POST(request: NextRequest) {
       );
       return NextResponse.json(updated, { status: 201 });
     }
-    console.error("Screening returned error score for new application:", result.summary);
+    // Log the id only — the summary carries the applicant's income figures.
+    console.error(
+      "Screening returned an error score for application:",
+      application.id
+    );
   } catch (err) {
     console.error("Screening/update failed (application still saved):", err);
   }

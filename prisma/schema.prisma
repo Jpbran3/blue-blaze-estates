@@ -47,6 +47,9 @@ model Application {
   /// not destroyed by a migration. Purge with `npm run db:purge-ssn` once the
   /// owner has confirmed, then drop the column in a follow-up migration.
   ssn                        String?
+  /// DEPRECATED — no longer collected or written. Retained so existing rows are
+  /// not destroyed. Purge with `npm run db:purge-sensitive`, then drop the
+  /// column in a follow-up migration.
   driversLicense             String?
   birthDate                  String?
   employer                   String?
@@ -57,6 +60,7 @@ model Application {
   monthlyWages               String?
   previousEmployer           String?
   spouseName                 String?
+  /// DEPRECATED — see `driversLicense` above. No longer collected or written.
   spouseDriversLicense       String?
   spouseBirthDate            String?
   /// DEPRECATED — see `ssn` above. No longer collected or written.

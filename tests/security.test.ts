@@ -16,9 +16,9 @@ test("sessions reject tampering, expiry, wrong password, and legacy hashes", () 
 });
 
 const valid = { applicantName: "Synthetic Test", phone: "618-555-0100", electronicSignature: "Synthetic Test" };
-test("application allowlist discards SSN/child data and internal screening fields", () => {
-  const result = parseApplication({ ...valid, ssn: "synthetic", spouseSsn: "synthetic", childrenResiding: "synthetic", aiScore: 10, status: "approved", archived: true, manualReviewRequested: true });
-  for (const key of ["ssn", "spouseSsn", "childrenResiding", "aiScore", "status", "archived"]) assert.equal(key in result, false);
+test("application allowlist discards SSN/licence/child data and internal screening fields", () => {
+  const result = parseApplication({ ...valid, ssn: "synthetic", spouseSsn: "synthetic", driversLicense: "synthetic", spouseDriversLicense: "synthetic", childrenResiding: "synthetic", aiScore: 10, status: "approved", archived: true, manualReviewRequested: true });
+  for (const key of ["ssn", "spouseSsn", "driversLicense", "spouseDriversLicense", "childrenResiding", "aiScore", "status", "archived"]) assert.equal(key in result, false);
   assert.equal(result.manualReviewRequested, true);
   assert.equal(result.listingId, null);
 });

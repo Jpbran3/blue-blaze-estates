@@ -25,7 +25,6 @@ const EMPTY_FORM = {
   presentAddress: "",
   townStateZip: "",
   phone: "",
-  driversLicense: "",
   birthDate: "",
   employer: "",
   employerAddress: "",
@@ -35,7 +34,6 @@ const EMPTY_FORM = {
   monthlyWages: "",
   previousEmployer: "",
   spouseName: "",
-  spouseDriversLicense: "",
   spouseBirthDate: "",
   spouseEmployer: "",
   spouseEmployerAddress: "",
@@ -299,14 +297,6 @@ function ApplyForm() {
             className={inputCls(!!errors.phone)}
           />
         </Field>
-        <Field label="Driver's License #">
-          <input
-            type="text"
-            value={form.driversLicense}
-            onChange={(e) => set("driversLicense", e.target.value)}
-            className={inputCls()}
-          />
-        </Field>
         <Field label="Birth Date">
           <input
             type="date"
@@ -417,14 +407,6 @@ function ApplyForm() {
                 />
               </Field>
             </div>
-            <Field label="Spouse's Driver's License #">
-              <input
-                type="text"
-                value={form.spouseDriversLicense}
-                onChange={(e) => set("spouseDriversLicense", e.target.value)}
-                className={inputCls()}
-              />
-            </Field>
             <Field label="Spouse's Birth Date">
               <input
                 type="date"

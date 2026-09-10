@@ -41,9 +41,9 @@ npm run dev                  # http://localhost:3000
 - `next.config.ts` — security headers (CSP, X-Frame-Options, Referrer-Policy, …)
 
 ## Compliance notes
-- **SSNs are not collected.** The `ssn`/`spouseSsn` columns are retained for legacy rows only — never write to them.
+- **SSNs and driver's licence numbers are not collected.** The `ssn`, `spouseSsn`, `driversLicense` and `spouseDriversLicense` columns are retained for legacy rows only — never write to them.
 - **Household composition is never scored.** Familial status is protected under the Fair Housing Act; `lib/screenTenant.ts` withholds those fields from the model entirely.
-- Purge legacy SSN/children data with `npm run db:purge-ssn -- --dry-run`, then `-- --confirm`.
+- Purge legacy SSN / driver's-licence / children data with `npm run db:purge-sensitive -- --dry-run`, then `-- --confirm`.
 
 ## Branding
 Name: **Blue Blaze Estates** · Colors: blue (`blue-900`) & white · Logo: BB + house badge (inline SVG in Header/Footer, standalone at `public/logo.svg`). Contact: 618-942-7624 · blueblazeestates@gmail.com.

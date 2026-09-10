@@ -9,9 +9,9 @@
     "start": "next start",
     "lint": "eslint",
     "db:seed": "npx tsx prisma/seed.ts",
-    "db:purge-ssn": "npx tsx prisma/purge-ssn.ts",
     "test": "tsx --test tests/*.test.ts",
-    "db:prepare-compliance": "tsx scripts/migrate-compliance.ts"
+    "db:prepare-compliance": "tsx scripts/migrate-compliance.ts",
+    "db:purge-sensitive": "npx tsx prisma/purge-sensitive.ts"
   },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"

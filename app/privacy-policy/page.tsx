@@ -24,17 +24,23 @@ export default function PrivacyPolicyPage() {
       <p>
         <strong>Rental application information.</strong> If you submit our
         rental application, we collect what you type into that form: your name,
-        present address, phone number, driver&apos;s license number, date of
-        birth, employment and income details, your spouse&apos;s details if you
-        provide them, the total number of people who would live in the home, the
-        names of any other adults who would live with you, your rental history
-        and landlord contacts, your answer to the criminal-history question,
-        which unit you are interested in, and your typed electronic signature.
+        present address, phone number, date of birth, employment and income
+        details, your spouse&apos;s details if you provide them, the total
+        number of people who would live in the home, the names of any other
+        adults who would live with you, your rental history and landlord
+        contacts, your answer to the criminal-history question, which unit you
+        are interested in, and your typed electronic signature.
       </p>
       <p>
-        <strong>We do not ask for your Social Security number on this website.</strong>{" "}
-        If a rental is approved, any additional information needed to prepare a
-        lease is collected separately and directly, not through this site.
+        <strong>
+          We do not ask for your Social Security number or your driver&apos;s
+          licence number on this website.
+        </strong>{" "}
+        We deliberately do not collect the two pieces of information most useful
+        to an identity thief, so that a breach of this site could not expose
+        them. If a rental is approved, any additional information needed to
+        prepare a lease is collected separately and directly, not through this
+        site.
       </p>
       <p>
         <strong>Basic technical information.</strong> Like any website, our host
@@ -79,8 +85,9 @@ export default function PrivacyPolicyPage() {
         <strong>What is deliberately withheld from it:</strong> your name,
         address, phone number and email; your spouse&apos;s name; how many people
         would live in the home and who they are; the names and phone numbers of
-        the landlords you list; and any free-text notes. Your driver&apos;s
-        licence number and date of birth are never sent.
+        the landlords you list; and any free-text notes. Your date of birth is
+        never sent (and we no longer collect a driver&apos;s licence number at
+        all).
       </p>
       <p>
         <strong>
@@ -153,8 +160,9 @@ export default function PrivacyPolicyPage() {
         Applications are transmitted over an encrypted HTTPS connection and
         stored in a database that is not publicly reachable. The admin dashboard
         is password protected and is not indexed by search engines. No system is
-        perfectly secure, but we do not collect Social Security numbers through
-        this site specifically to limit what a breach could expose.
+        perfectly secure, so we limit what a breach could expose in the first
+        place: we do not collect Social Security or driver&apos;s licence
+        numbers through this site at all.
       </p>
       <p>
         If a breach affecting personal information occurs, we will notify

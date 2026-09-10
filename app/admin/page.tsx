@@ -34,7 +34,6 @@ interface Application {
   presentAddress?: string | null;
   townStateZip?: string | null;
   phone: string;
-  driversLicense?: string | null;
   birthDate?: string | null;
   employer?: string | null;
   employerAddress?: string | null;
@@ -44,7 +43,6 @@ interface Application {
   monthlyWages?: string | null;
   previousEmployer?: string | null;
   spouseName?: string | null;
-  spouseDriversLicense?: string | null;
   spouseBirthDate?: string | null;
   spouseEmployer?: string | null;
   spouseEmployerAddress?: string | null;
@@ -87,7 +85,6 @@ const APPLICATION_FIELDS: [string, keyof Application][] = [
   ["Interest / Unit", "interest"],
   ["Present Address", "presentAddress"],
   ["Town, State, Zip", "townStateZip"],
-  ["Driver's License #", "driversLicense"],
   ["Birth Date", "birthDate"],
   ["Employer", "employer"],
   ["Employer Address", "employerAddress"],
@@ -97,7 +94,6 @@ const APPLICATION_FIELDS: [string, keyof Application][] = [
   ["Monthly Wages", "monthlyWages"],
   ["Previous Employer", "previousEmployer"],
   ["Spouse Name", "spouseName"],
-  ["Spouse DL #", "spouseDriversLicense"],
   ["Spouse Birth Date", "spouseBirthDate"],
   ["Spouse Employer", "spouseEmployer"],
   ["Spouse Employer Address", "spouseEmployerAddress"],

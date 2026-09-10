@@ -121,12 +121,47 @@ test("admin edits do not re-screen a manual-review application", () => {
   assert.match(route, /hasContentChanges && !application\.manualReviewRequested/);
 });
 
-test("SSN and children fields are never written by the API", () => {
+test("SSN, driver's licence and children fields are never written by the API", () => {
   const route = fs.readFileSync(
     path.join(process.cwd(), "app/api/applications/route.ts"),
     "utf8"
   );
-  for (const banned of ["ssn:", "spouseSsn:", "childrenResiding:"]) {
+  for (const banned of [
+    "ssn:",
+    "spouseSsn:",
+    "driversLicense:",
+    "spouseDriversLicense:",
+    "childrenResiding:",
+  ]) {
     assert.equal(route.includes(banned), false, `${banned} must not be written`);
+  }
+});
+
+test("the public form does not collect SSN or driver's licence", () => {
+  const form = fs.readFileSync(
+    path.join(process.cwd(), "app/apply/page.tsx"),
+    "utf8"
+  );
+  for (const banned of [
+    "ssn",
+    "spouseSsn",
+    "driversLicense",
+    "spouseDriversLicense",
+  ]) {
+    assert.equal(
+      new RegExp(`\\b${banned}\\b`).test(form),
+      false,
+      `${banned} must not appear in the application form`
+    );
+  }
+});
+
+test("the admin dashboard does not display SSN or driver's licence", () => {
+  const admin = fs.readFileSync(
+    path.join(process.cwd(), "app/admin/page.tsx"),
+    "utf8"
+  );
+  for (const banned of ["driversLicense", "spouseDriversLicense", "spouseSsn"]) {
+    assert.equal(admin.includes(banned), false, `${banned} must not be displayed`);
   }
 });

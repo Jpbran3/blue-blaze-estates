@@ -1,12 +1,14 @@
 /**
- * One-time cleanup: blank the SSN and children's-names columns on applications
- * that were submitted before those fields were removed from the form.
+ * One-time cleanup: blank the sensitive columns that are no longer collected —
+ * SSN, spouse SSN, driver's licence, spouse driver's licence, and children's
+ * names — on applications submitted before those fields were removed from the
+ * form.
  *
  * This is DESTRUCTIVE and irreversible. It refuses to run without an explicit
  * confirmation flag so it can never fire from a stray `npm run` or a CI step:
  *
- *   npx tsx prisma/purge-ssn.ts --dry-run   # show what would change
- *   npx tsx prisma/purge-ssn.ts --confirm   # actually purge
+ *   npx tsx prisma/purge-sensitive.ts --dry-run   # show what would change
+ *   npx tsx prisma/purge-sensitive.ts --confirm   # actually purge
  *
  * Take a Turso backup first. Once this has run and the owner has confirmed,
  * drop the columns in a follow-up migration.
@@ -31,6 +33,8 @@ async function main() {
       OR: [
         { ssn: { not: null } },
         { spouseSsn: { not: null } },
+        { driversLicense: { not: null } },
+        { spouseDriversLicense: { not: null } },
         { childrenResiding: { not: null } },
       ],
     },
@@ -40,12 +44,14 @@ async function main() {
       createdAt: true,
       ssn: true,
       spouseSsn: true,
+      driversLicense: true,
+      spouseDriversLicense: true,
       childrenResiding: true,
     },
   });
 
   if (affected.length === 0) {
-    console.log("Nothing to purge — no rows hold SSN or children's-name data.");
+    console.log("Nothing to purge — no rows hold SSN, driver's-licence or children's-name data.");
     return;
   }
 
@@ -54,6 +60,8 @@ async function main() {
     const fields = [
       a.ssn ? "ssn" : null,
       a.spouseSsn ? "spouseSsn" : null,
+      a.driversLicense ? "driversLicense" : null,
+      a.spouseDriversLicense ? "spouseDriversLicense" : null,
       a.childrenResiding ? "childrenResiding" : null,
     ].filter(Boolean);
     console.log(
@@ -69,7 +77,13 @@ async function main() {
 
   const result = await prisma.application.updateMany({
     where: { id: { in: affected.map((a) => a.id) } },
-    data: { ssn: null, spouseSsn: null, childrenResiding: null },
+    data: {
+      ssn: null,
+      spouseSsn: null,
+      driversLicense: null,
+      spouseDriversLicense: null,
+      childrenResiding: null,
+    },
   });
 
   console.log(`\nPurged ${result.count} application(s).`);

@@ -41,6 +41,19 @@ test("identity and contact data never reach the screening model", () => {
   }
 });
 
+test("date of birth never reaches the screening model", () => {
+  // DOB is collected solely to confirm the applicant is 18. Age is protected in
+  // Illinois housing (IHRA, age 40+), so it must not reach a scoring model —
+  // and the prompt must not invite the model to reason about age at all.
+  assert.equal(payload.includes("app.birthDate"), false);
+  assert.equal(payload.includes("app.spouseBirthDate"), false);
+  const prompt = source.slice(
+    source.indexOf("const SYSTEM_PROMPT"),
+    source.indexOf("function buildUserMessage")
+  );
+  assert.match(prompt, /never ask for it, infer an age, or refer to age/);
+});
+
 test("household composition never reaches the screening model", () => {
   // Familial status is a protected class under the FHA and the IHRA.
   for (const banned of [

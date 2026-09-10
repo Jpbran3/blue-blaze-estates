@@ -110,7 +110,7 @@ Score guide:
 
 SUMMARY: 2-4 sentences. Always include the rent-to-income result with actual dollar figures. Include the top positive and the top concern.
 
-NEVER base any part of the score or summary on, or make any reference to, the following — doing so is unlawful housing discrimination: race, color, religion, sex, national origin, disability, familial status, age, marital status, number or presence of children, household size, sexual orientation, gender identity, military status, order of protection status, or source of income (including housing vouchers or public assistance). Do not infer any of these from names, addresses, or employers. Also never mention driver's license or birth date.
+NEVER base any part of the score or summary on, or make any reference to, the following — doing so is unlawful housing discrimination: race, color, religion, sex, national origin, disability, familial status, age, marital status, number or presence of children, household size, sexual orientation, gender identity, military status, order of protection status, or source of income (including housing vouchers or public assistance). Do not infer any of these from names, addresses, or employers. You are not given the applicant's date of birth, and you must never ask for it, infer an age, or refer to age in any way.
 
 OUTPUT: Respond ONLY with valid JSON — no markdown, no explanation, no preamble:
 {"score": <integer 1-10>, "summary": "<string>"}`;

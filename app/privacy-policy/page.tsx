@@ -32,6 +32,12 @@ export default function PrivacyPolicyPage() {
         are interested in, and your typed electronic signature.
       </p>
       <p>
+        <strong>Your date of birth is used for one purpose only:</strong>{" "}
+        confirming you are 18 or older and can enter into a lease. It plays no
+        part in how your application is assessed, and it is never sent to the
+        automated review tool described below.
+      </p>
+      <p>
         <strong>
           We do not ask for your Social Security number or your driver&apos;s
           licence number on this website.

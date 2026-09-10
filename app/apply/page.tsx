@@ -297,14 +297,26 @@ function ApplyForm() {
             className={inputCls(!!errors.phone)}
           />
         </Field>
+        {/*
+          Date of birth is collected for one reason only: confirming the
+          applicant is 18 and can enter a lease. Saying so on the form is not
+          decoration — age is a protected characteristic in Illinois housing
+          (the Illinois Human Rights Act covers age 40 and over), so the narrow
+          purpose should be visible to the applicant and to anyone maintaining
+          this. It is never sent to the screening tool; see lib/screenTenant.ts.
+        */}
         <Field label="Birth Date">
           <input
             type="date"
             value={form.birthDate}
             onChange={(e) => set("birthDate", e.target.value)}
             className={inputCls()}
+            aria-describedby="birthDate-purpose"
           />
         </Field>
+        <p id="birthDate-purpose" className="-mt-3 text-xs text-gray-600">
+          Used only to confirm you are 18 or older.
+        </p>
         <div className="sm:col-span-2">
           <Field label="Current Place of Employment">
             <input

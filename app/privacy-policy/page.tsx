@@ -134,10 +134,16 @@ export default function PrivacyPolicyPage() {
       </p>
       <p>
         Information provided to the screening services is governed by their own
-        privacy notices: <a href="https://www.tenantbackgroundsearch.com/privacy.cfm">
+        privacy notices: <a
+          href="https://www.tenantbackgroundsearch.com/privacy.cfm"
+          rel="noopener noreferrer"
+        >
           Tenant Background Search
         </a>{" "}
-        and <a href="https://www.transunion.com/privacy/rental-screening-services">
+        and <a
+          href="https://www.transunion.com/privacy/rental-screening-services"
+          rel="noopener noreferrer"
+        >
           TransUnion Rental Screening Solutions
         </a>. To dispute information in a report, use the reporting agency&apos;s
         contact information and dispute instructions supplied with that report.

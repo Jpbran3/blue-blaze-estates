@@ -1,5 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
 import { createSession, validSession, SESSION_SECONDS } from "../lib/session";
 import { readJsonObject, RequestError } from "../lib/requestBody";
 import { parseApplication } from "../lib/applicationInput";
@@ -42,4 +44,43 @@ test("chunked JSON cannot evade the byte limit with missing Content-Length", asy
   const stream = new ReadableStream({ start(controller) { controller.enqueue(new TextEncoder().encode('"' + "x".repeat(200) + '"')); controller.close(); } });
   const request = new Request("http://localhost", { method: "POST", headers: { "Content-Type": "application/json" }, body: stream, duplex: "half" } as RequestInit);
   await assert.rejects(readJsonObject(request, 100), { status: 413 });
+});
+
+// Every link that leaves the site must carry rel="noopener noreferrer", so a
+// target page can never reach back through window.opener or read the referrer.
+// Applies whether or not the link opens in a new tab: target="_blank" may be
+// added later, and the referrer leak does not depend on it.
+test("external links in app/ and components/ set rel=\"noopener noreferrer\"", () => {
+  const roots = ["app", "components"];
+  const files: string[] = [];
+  const walk = (dir: string) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        if (entry.name !== "generated") walk(full);
+      } else if (entry.name.endsWith(".tsx") || entry.name.endsWith(".ts")) {
+        files.push(full);
+      }
+    }
+  };
+  for (const root of roots) walk(path.join(process.cwd(), root));
+  assert.ok(files.length > 0, "found no source files to scan");
+
+  let checked = 0;
+  for (const file of files) {
+    const source = fs.readFileSync(file, "utf8");
+    for (const tag of source.match(/<a\s[^>]*>/g) ?? []) {
+      const href = tag.match(/href=(?:"([^"]*)"|\{?`([^`]*)`\}?)/);
+      const url = href?.[1] ?? href?.[2] ?? "";
+      if (!/^https?:\/\//.test(url)) continue; // tel:, mailto: and internal paths
+      checked++;
+      const rel = tag.match(/rel="([^"]*)"/)?.[1] ?? "";
+      const where = `${path.relative(process.cwd(), file)} -> ${url}`;
+      assert.ok(rel.split(/\s+/).includes("noopener"), `missing rel=noopener: ${where}`);
+      assert.ok(rel.split(/\s+/).includes("noreferrer"), `missing rel=noreferrer: ${where}`);
+    }
+  }
+  // Guards the scanner itself: the two screening-provider privacy links in the
+  // privacy policy must be found, or the regex has silently stopped matching.
+  assert.ok(checked >= 2, `expected to check at least 2 external links, checked ${checked}`);
 });

@@ -99,15 +99,84 @@ answer on file. Ask exactly this:
 > your platform supplies an adverse action notice containing those details, please send us
 > a sample.
 
-Record the answer here once received:
+### Published contact for the credit component — use this unless a report says otherwise
+
+Researched 2026-09-11 from public sources. This is the consumer-facing dispute and
+free-report contact that TransUnion and the CFPB publish for TransUnion Rental Screening
+Solutions, the agency Tenant Background Search identifies as its credit-report service.
 
 ```
-[NEEDS OWNER INPUT: CRA name exactly as it should appear on the notice]
-[NEEDS OWNER INPUT: CRA mailing address for disputes and free-report requests]
-[NEEDS OWNER INPUT: CRA telephone number]
-[NEEDS OWNER INPUT: if more than one agency supplies components, list each with its own
-address and phone, and note which report component each one furnished]
+TransUnion Rental Screening Solutions, Inc.
+Attention: Consumer Dispute Team
+P.O. Box 800
+Woodlyn, PA 19094
+Phone: 800-230-9376 (select option 4)
 ```
+
+Sources, in order of authority:
+- CFPB list of consumer reporting companies, entry "TransUnion Rental Screening Solutions,
+  Inc. (TransUnion SmartMove)" — gives the P.O. Box 800 address and 800-230-9376 option 4.
+  https://www.consumerfinance.gov/consumer-tools/credit-reports-and-scores/consumer-reporting-companies/companies-list/trans-union-smart-move/
+- TransUnion's own rental screening dispute page:
+  https://www.transunion.com/client-support/rental-screening-disputes
+
+Other numbers appear in circulation for the same team (833-458-6338 and 866-775-0961, and
+the address TURSSDispute@transunion.com). Prefer the CFPB-listed 800-230-9376, and prefer
+whatever a specific report prints over any of these.
+
+### What this does NOT settle — still confirm
+
+This is a published contact, not confirmation of what Blue Blaze's account actually
+supplies. Two gaps remain, and both matter:
+
+1. **The credit component is only part of the report.** Tenant Background Search lists
+   TransUnion, CoreLogic, BDS and other data sources. If a criminal or eviction component
+   comes from a different agency, that agency must be named on the notice for that
+   component — the TURSS address will not reach it.
+2. **The report itself is authoritative.** Each report normally names its furnisher. If a
+   report names a different agency or a different address, use what the report says.
+
+### Owner-confirmed split — 2026-09-11
+
+The owner confirms: **Tenant Background Search uses TransUnion for the credit report and
+supplies the criminal and eviction records itself.** So two different agencies can be
+involved depending on what the decision rested on.
+
+```
+CREDIT component — supplied via TransUnion
+    TransUnion Rental Screening Solutions, Inc.
+    Attention: Consumer Dispute Team
+    P.O. Box 800
+    Woodlyn, PA 19094
+    800-230-9376 (option 4)
+
+CRIMINAL and EVICTION components — supplied by Tenant Background Search
+    Tenant Background Search
+    [NEEDS OWNER INPUT: mailing address. NOT published on their website — the owner
+     checked. Get it from (a) the report itself, which normally prints the furnisher's
+     notice address, or (b) Tenant Background Search directly on 1-844-205-0177 or
+     support@tenantbackgroundsearch.com. This does NOT go on the website; it goes on
+     the denial letter, and the FCRA requires name, address AND phone there.]
+    1-844-205-0177
+    support@tenantbackgroundsearch.com
+    (published hours: Mon–Fri 9:00–17:00 Central)
+```
+
+**The mailing address is the one piece still missing and the notice legally needs it.**
+A phone number alone does not satisfy the requirement to identify the agency with its
+address. Ask Tenant Background Search directly — one line is enough:
+
+> For FCRA adverse action notices, what is the mailing address we must print for
+> applicants to request a free copy of their report and dispute its accuracy?
+
+Note on upstream sources: Tenant Background Search lists CoreLogic and BDS among its data
+providers. That does not change who you name — the notice identifies the agency that
+supplied **the report to you**, which is Tenant Background Search for those components.
+Their upstream suppliers are their business, not the applicant's contact point.
+
+**If the decision rested on both credit and criminal/eviction information, name both
+agencies.** Naming only one sends the applicant to a company that cannot help with half
+the report.
 
 Re-verify this against each report before sending a notice; if a report names a different
 furnisher, use the one on that report.
@@ -197,9 +266,17 @@ know that we have [choose one and delete the others:
 In making this decision, we used information from a consumer report about you. The
 consumer reporting agency that supplied that report is:
 
-    [NEEDS OWNER INPUT: CRA name exactly as identified on the report — see Part 2]
-    [NEEDS OWNER INPUT: CRA mailing address for notices, disputes and report requests]
-    [NEEDS OWNER INPUT: CRA telephone number]
+    TransUnion Rental Screening Solutions, Inc.
+    Attention: Consumer Dispute Team
+    P.O. Box 800
+    Woodlyn, PA 19094
+    800-230-9376 (option 4)
+
+    ^ CHECK THE REPORT BEFORE SENDING. The block above is the published contact
+      for the credit component (see Part 2). If the report you actually used names
+      a different agency — likely for a criminal or eviction component — replace
+      this with the agency named on that report. If more than one agency supplied
+      information you relied on, list each one.
 
 The consumer reporting agency named above did not make the decision to take this action
 and is not able to give you the specific reasons for it.
@@ -329,10 +406,21 @@ Who may access them
   [NEEDS OWNER INPUT: named people or roles with access to the copies above, and whether
    anyone outside the business can reach them]
 
-Retention period for report copies
-  [NEEDS OWNER INPUT: how long a report copy is kept after the rental decision — set a
-   definite period; see the recommendation above. This is a separate decision from the
-   indefinite retention of applications.]
+Retention period for report copies — owner-confirmed 2026-09-11
+  APPROVED APPLICANTS WHO BECOME TENANTS:
+    Report copies are kept until the tenant is removed from the property, then disposed
+    of securely. This is the owner's stated practice.
+
+  ⚠️ DENIED APPLICANTS — NOT YET COVERED, AND THIS IS THE LARGER GROUP
+    "Until the tenant is removed from the property" has no meaning for someone who never
+    became a tenant. Applicants you turn down still generated a report, and those copies
+    would otherwise be kept forever with no trigger to destroy them — which is the exact
+    situation the Disposal Rule exists to prevent, and it is also the group most likely
+    to dispute a report later.
+    [NEEDS OWNER INPUT: how long a report copy is kept for an applicant who was NOT
+     approved. A common choice is a fixed period after the decision, long enough to
+     answer a dispute or a fair-housing enquiry but not indefinite. Pick a period and
+     apply it.]
 
 Disposal trigger and practice
   Trigger:             [NEEDS OWNER INPUT: what starts disposal — e.g. retention period

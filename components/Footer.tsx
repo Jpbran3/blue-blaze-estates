@@ -46,7 +46,8 @@ export default function Footer() {
               <span className="font-display text-lg font-bold">Blue Blaze Estates</span>
             </div>
             <p className="text-blue-200 text-sm leading-relaxed">
-              Quality rentals in the Southern Illinois area with a focus on providing quiet living.
+              Quality rentals in the Southern Illinois area with a focus on quiet
+              living. Housing vouchers and rental assistance welcome.
             </p>
           </div>
 

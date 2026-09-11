@@ -45,6 +45,37 @@ Thresholds were preserved exactly as the owner asked and are locked by tests in
 
 ---
 
+## Marketing to voucher holders without changing screening — 2026-09-11
+
+The owner asked for the site to appeal to renters using housing vouchers, and
+that copy is now live: hero, homepage intro, a feature card, the footer, and the
+page title and meta description.
+
+**The conflict was raised and the owner chose to proceed without changing the
+screening rules.** Recorded here because it is not self-evident from the code.
+
+`lib/screenTenant.ts` rewards a named employer and stated wages, and penalises
+their absence ("Weak: no employer listed", and a 2-point deduction when no
+wages are given). A renter whose income is a housing subsidy plus benefits can
+trigger those penalties *because of the source of their income*. Illinois
+protects source of income in housing.
+
+Marketing to that group while running those criteria is a different risk from
+either on its own: the advertising establishes that the applicants were
+deliberately solicited, and the screening then applies criteria that can
+disadvantage them.
+
+The fix discussed and declined for now was narrow — count verified income from
+any lawful source (wages, vouchers, benefits, self-employment, support
+payments) instead of employment specifically, leaving the 33% rent-to-income
+threshold, the weightings and the felony rule untouched. It remains available.
+
+Note also that the copy avoids naming the federal program at the owner's
+request. That is a presentational choice, not a legal one, and it costs the
+search traffic from people looking for that program by name.
+
+---
+
 ## Other decisions
 
 | Decision | Date | Note |

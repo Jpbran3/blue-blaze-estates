@@ -58,7 +58,8 @@ export default function HeroCarousel() {
           Quality Homes in the Southern Illinois Area
         </p>
         <p className="text-base md:text-lg text-gray-200 max-w-2xl mx-auto mb-10">
-          Quality rentals in the Southern Illinois area with a focus on providing quiet living.
+          Quality rentals in the Southern Illinois area with a focus on quiet
+          living. Housing vouchers and rental assistance are welcome here.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <a

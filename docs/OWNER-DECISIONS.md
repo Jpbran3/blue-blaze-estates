@@ -61,9 +61,15 @@ Thresholds were preserved exactly as the owner asked and are locked by tests in
 
 ## Still outstanding
 
-- **The CRA's notice address and phone.** Blocking for the adverse-action
-  notice. Must come from the Tenant Background Search account documentation —
-  a general TransUnion address is not a substitute.
+- **The CRA's notice address and phone — partially resolved 2026-09-11.** The
+  published contact for the credit component (TransUnion Rental Screening
+  Solutions, P.O. Box 800, Woodlyn PA 19094, 800-230-9376 option 4) is confirmed
+  against the CFPB's list of consumer reporting companies and TransUnion's own
+  dispute page, and is now filled into the notice template. Still outstanding:
+  written confirmation from Tenant Background Search that this is correct for
+  this account, and the furnisher details for the criminal and eviction
+  components, which may come from a different agency (their site lists CoreLogic
+  and BDS among its sources). Always check the specific report before sending.
 - **Which screening package** is ordered, and whether a credit score is
   returned and used (score disclosures are required if so).
 - **Where report copies are stored, who can access them, and the disposal

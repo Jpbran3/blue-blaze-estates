@@ -99,14 +99,51 @@ answer on file. Ask exactly this:
 > your platform supplies an adverse action notice containing those details, please send us
 > a sample.
 
-Record the answer here once received:
+### Published contact for the credit component — use this unless a report says otherwise
+
+Researched 2026-09-11 from public sources. This is the consumer-facing dispute and
+free-report contact that TransUnion and the CFPB publish for TransUnion Rental Screening
+Solutions, the agency Tenant Background Search identifies as its credit-report service.
 
 ```
-[NEEDS OWNER INPUT: CRA name exactly as it should appear on the notice]
-[NEEDS OWNER INPUT: CRA mailing address for disputes and free-report requests]
-[NEEDS OWNER INPUT: CRA telephone number]
-[NEEDS OWNER INPUT: if more than one agency supplies components, list each with its own
-address and phone, and note which report component each one furnished]
+TransUnion Rental Screening Solutions, Inc.
+Attention: Consumer Dispute Team
+P.O. Box 800
+Woodlyn, PA 19094
+Phone: 800-230-9376 (select option 4)
+```
+
+Sources, in order of authority:
+- CFPB list of consumer reporting companies, entry "TransUnion Rental Screening Solutions,
+  Inc. (TransUnion SmartMove)" — gives the P.O. Box 800 address and 800-230-9376 option 4.
+  https://www.consumerfinance.gov/consumer-tools/credit-reports-and-scores/consumer-reporting-companies/companies-list/trans-union-smart-move/
+- TransUnion's own rental screening dispute page:
+  https://www.transunion.com/client-support/rental-screening-disputes
+
+Other numbers appear in circulation for the same team (833-458-6338 and 866-775-0961, and
+the address TURSSDispute@transunion.com). Prefer the CFPB-listed 800-230-9376, and prefer
+whatever a specific report prints over any of these.
+
+### What this does NOT settle — still confirm
+
+This is a published contact, not confirmation of what Blue Blaze's account actually
+supplies. Two gaps remain, and both matter:
+
+1. **The credit component is only part of the report.** Tenant Background Search lists
+   TransUnion, CoreLogic, BDS and other data sources. If a criminal or eviction component
+   comes from a different agency, that agency must be named on the notice for that
+   component — the TURSS address will not reach it.
+2. **The report itself is authoritative.** Each report normally names its furnisher. If a
+   report names a different agency or a different address, use what the report says.
+
+Record the confirmed answer here once the vendor replies:
+
+```
+Credit component:   TransUnion Rental Screening Solutions, Inc. (see above) — confirm
+Criminal component: [NEEDS OWNER INPUT: furnisher name, address, phone]
+Eviction component: [NEEDS OWNER INPUT: furnisher name, address, phone]
+[NEEDS OWNER INPUT: confirmation from Tenant Background Search that the above is correct
+for this account, or a sample adverse action notice from their platform]
 ```
 
 Re-verify this against each report before sending a notice; if a report names a different
@@ -197,9 +234,17 @@ know that we have [choose one and delete the others:
 In making this decision, we used information from a consumer report about you. The
 consumer reporting agency that supplied that report is:
 
-    [NEEDS OWNER INPUT: CRA name exactly as identified on the report — see Part 2]
-    [NEEDS OWNER INPUT: CRA mailing address for notices, disputes and report requests]
-    [NEEDS OWNER INPUT: CRA telephone number]
+    TransUnion Rental Screening Solutions, Inc.
+    Attention: Consumer Dispute Team
+    P.O. Box 800
+    Woodlyn, PA 19094
+    800-230-9376 (option 4)
+
+    ^ CHECK THE REPORT BEFORE SENDING. The block above is the published contact
+      for the credit component (see Part 2). If the report you actually used names
+      a different agency — likely for a criminal or eviction component — replace
+      this with the agency named on that report. If more than one agency supplied
+      information you relied on, list each one.
 
 The consumer reporting agency named above did not make the decision to take this action
 and is not able to give you the specific reasons for it.

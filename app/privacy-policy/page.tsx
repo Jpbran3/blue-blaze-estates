@@ -194,10 +194,11 @@ export default function PrivacyPolicyPage() {
 
       <h2>How long we keep it</h2>
       <p>
-        We keep rental applications on file indefinitely, including applications
-        that do not result in a tenancy, unless deletion is required by applicable
-        law. You may request deletion using the contact details below. We review
-        these requests in accordance with applicable law.
+        We keep a rental application until the unit it was submitted for has been
+        filled. If your application leads to a tenancy, we keep it as part of
+        your tenant file for as long as you live in the home. You may ask us to
+        delete your application at any time using the contact details below, and
+        we will do so unless we are required to keep it by law.
       </p>
       <p>
         <strong>Background and credit reports are handled separately.</strong>{" "}

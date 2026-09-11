@@ -77,8 +77,8 @@ export default async function HomePage() {
                   d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"
                 />
               ),
-              title: "Fast Response",
-              desc: "Responsive management when you need us",
+              title: "Vouchers Welcome",
+              desc: "Housing vouchers and rental assistance accepted",
             },
           ].map(({ icon, title, desc }) => (
             <div key={title} className="p-4">
@@ -108,8 +108,9 @@ export default async function HomePage() {
             Browse Properties
           </h2>
           <p className="text-gray-500 max-w-xl mx-auto">
-            We manage quality rental properties in the Southern Illinois area.
-            Click a property to see available units.
+            We manage quality rental properties in the Southern Illinois area,
+            in and around Herrin. We welcome renters using housing vouchers or
+            other rental assistance. Click a property to see available units.
           </p>
         </div>
 

@@ -15,9 +15,10 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Blue Blaze Estates — Quality Rentals in Southern Illinois",
+  title:
+    "Blue Blaze Estates — Quality Rentals in Southern Illinois, Vouchers Welcome",
   description:
-    "Quality rentals in the Southern Illinois area with a focus on providing quiet living. Now leasing at Blue Blaze Mobile Home Park in Herrin, IL.",
+    "Quality rentals in Herrin and the Southern Illinois area, with a focus on quiet living. Housing vouchers and rental assistance are welcome. Now leasing at Blue Blaze Mobile Home Park in Herrin, IL.",
   icons: {
     icon: [
       { url: "/logo.svg", type: "image/svg+xml" },

@@ -119,6 +119,24 @@ function Field({
   );
 }
 
+/**
+ * True only when the value is a complete, valid date that is under 18 years
+ * ago. A half-typed date must not flash a warning, so anything unparseable or
+ * in the future returns false.
+ */
+function isUnderEighteen(value: string): boolean {
+  if (!value) return false;
+  const dob = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(dob.getTime())) return false;
+
+  const today = new Date();
+  if (dob > today) return false;
+
+  const eighteenth = new Date(dob);
+  eighteenth.setFullYear(eighteenth.getFullYear() + 18);
+  return eighteenth > today;
+}
+
 const inputCls = (hasError?: boolean) =>
   `w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
     hasError ? "border-red-600 bg-red-50" : "border-gray-500"
@@ -319,6 +337,22 @@ function ApplyForm() {
         <p id="birthDate-purpose" className="-mt-3 text-xs text-gray-600">
           Used only to confirm you are 18 or older.
         </p>
+        {/*
+          Warn, but do not block — the owner's decision. A wrong year is more
+          likely than an actual minor applying, so this flags the problem
+          without trapping someone behind a typo. role="alert" announces it to
+          a screen reader when it appears.
+        */}
+        {isUnderEighteen(form.birthDate) && (
+          <p
+            role="alert"
+            className="-mt-2 rounded-lg border border-amber-600 bg-amber-50 px-3 py-2 text-xs text-amber-900 sm:col-span-2"
+          >
+            That date of birth is under 18. Applicants must be 18 or older to
+            enter a lease. If you typed it by mistake, please correct it — you
+            can still submit, and we will be in touch either way.
+          </p>
+        )}
         <div className="sm:col-span-2">
           <Field label="Current Place of Employment">
             <input

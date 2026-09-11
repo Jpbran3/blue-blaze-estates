@@ -199,6 +199,14 @@ export default function PrivacyPolicyPage() {
         law. You may request deletion using the contact details below. We review
         these requests in accordance with applicable law.
       </p>
+      <p>
+        <strong>Background and credit reports are handled separately.</strong>{" "}
+        When we receive a screening report about you, we may keep a downloaded or
+        printed copy of it. Those copies are kept apart from the application
+        itself and are disposed of securely — shredded on paper, and erased so
+        they cannot be recovered when held electronically. Our indefinite
+        retention of applications does not apply to these reports.
+      </p>
 
       <h2>How we protect it</h2>
       <p>

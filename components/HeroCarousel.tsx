@@ -12,24 +12,26 @@ const heroImages = [
 
 export default function HeroCarousel() {
   const [current, setCurrent] = useState(0);
+  const [paused, setPaused] = useState(true);
 
   useEffect(() => {
     // Respect users who prefer reduced motion — don't auto-advance.
     const reduceMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
-    if (reduceMotion) return;
+    if (paused || reduceMotion) return;
 
     const interval = setInterval(() => {
       setCurrent((i) => (i + 1) % heroImages.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [paused]);
 
   return (
     <section
       className="relative text-white overflow-hidden"
-      style={{ height: "520px" }}
+      style={{ minHeight: "520px" }}
+      onFocusCapture={() => setPaused(true)}
       aria-roledescription="carousel"
       aria-label="Blue Blaze Estates property photos"
     >
@@ -37,12 +39,8 @@ export default function HeroCarousel() {
         <Image
           key={src}
           src={src}
-          alt={
-            i === 0
-              ? "Tree-lined street at Blue Blaze Mobile Home Park in Herrin, Illinois"
-              : ""
-          }
-          aria-hidden={i === 0 ? undefined : true}
+          alt={i === current ? `Blue Blaze Estates property view ${i + 1}` : ""}
+          aria-hidden={i !== current}
           fill
           sizes="100vw"
           className={`object-cover transition-opacity duration-1000 ease-in-out ${
@@ -52,7 +50,7 @@ export default function HeroCarousel() {
         />
       ))}
       <div className="absolute inset-0 bg-black/65" />
-      <div className="relative z-10 max-w-6xl mx-auto px-6 h-full flex flex-col items-center justify-center text-center">
+      <div className="relative z-10 max-w-6xl mx-auto px-6 min-h-[520px] pt-12 pb-24 flex flex-col items-center justify-center text-center">
         <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
           Blue Blaze Estates
         </h1>
@@ -79,20 +77,21 @@ export default function HeroCarousel() {
       </div>
 
       {/* Slide indicators */}
-      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-10 flex gap-2.5">
+      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1">
+        <button type="button" onClick={() => setPaused(p => !p)} aria-label={paused ? "Play slideshow" : "Pause slideshow"} className="mr-2 min-h-11 rounded-lg bg-black/70 px-3 text-sm text-white">
+          {paused ? "Play" : "Pause"}
+        </button>
         {heroImages.map((_, i) => (
           <button
             key={i}
             type="button"
-            onClick={() => setCurrent(i)}
+            onClick={() => { setCurrent(i); setPaused(true); }}
             aria-label={`Show slide ${i + 1} of ${heroImages.length}`}
             aria-current={i === current}
-            className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
-              i === current
-                ? "w-6 bg-white"
-                : "w-2.5 bg-white/50 hover:bg-white/80"
-            }`}
-          />
+            className="flex h-11 w-11 items-center justify-center rounded-full"
+          >
+            <span aria-hidden="true" className={`block h-3 rounded-full border border-white ${i === current ? "w-6 bg-white" : "w-3 bg-black/70"}`} />
+          </button>
         ))}
       </div>
     </section>

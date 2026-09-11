@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -25,8 +25,6 @@ const EMPTY_FORM = {
   presentAddress: "",
   townStateZip: "",
   phone: "",
-  ssn: "",
-  driversLicense: "",
   birthDate: "",
   employer: "",
   employerAddress: "",
@@ -36,9 +34,7 @@ const EMPTY_FORM = {
   monthlyWages: "",
   previousEmployer: "",
   spouseName: "",
-  spouseDriversLicense: "",
   spouseBirthDate: "",
-  spouseSsn: "",
   spouseEmployer: "",
   spouseEmployerAddress: "",
   spouseEmployerTownStateZip: "",
@@ -46,7 +42,7 @@ const EMPTY_FORM = {
   spouseEmploymentDuration: "",
   spouseMonthlyWages: "",
   spousePreviousEmployer: "",
-  childrenResiding: "",
+  occupantCount: "",
   adultsResiding: "",
   currentLandlord: "",
   currentLandlordPhone: "",
@@ -72,33 +68,78 @@ function SectionHeader({ children }: { children: React.ReactNode }) {
   );
 }
 
+/**
+ * The wrapping <label> already names the control. What was missing was the
+ * error wiring: the message sat outside the label with nothing tying it to the
+ * input, so a screen reader user landing on the field was told it was invalid by
+ * colour alone. The control now carries aria-invalid and aria-describedby
+ * pointing at the message.
+ */
 function Field({
   label,
   required,
   error,
+  fieldId,
   children,
 }: {
   label: string;
   required?: boolean;
   error?: string;
+  fieldId?: string;
   children: React.ReactNode;
 }) {
+  const errorId = error && fieldId ? `${fieldId}-error` : undefined;
+  const control =
+    React.isValidElement(children) && errorId
+      ? React.cloneElement(children as React.ReactElement<Record<string, unknown>>, {
+          "aria-invalid": true,
+          "aria-describedby": errorId,
+        })
+      : children;
+
   return (
     <div>
       <label className="block text-sm font-medium text-gray-700">
         <span className="mb-1 inline-block">
-          {label} {required && <span className="text-red-500">*</span>}
+          {label}{" "}
+          {required && (
+            <span className="text-red-700">
+              *<span className="sr-only"> (required)</span>
+            </span>
+          )}
         </span>
-        <span className="block font-normal">{children}</span>
+        <span className="block font-normal">{control}</span>
       </label>
-      {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+      {error && (
+        <p id={errorId} className="text-red-700 text-xs mt-1">
+          {error}
+        </p>
+      )}
     </div>
   );
 }
 
+/**
+ * True only when the value is a complete, valid date that is under 18 years
+ * ago. A half-typed date must not flash a warning, so anything unparseable or
+ * in the future returns false.
+ */
+function isUnderEighteen(value: string): boolean {
+  if (!value) return false;
+  const dob = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(dob.getTime())) return false;
+
+  const today = new Date();
+  if (dob > today) return false;
+
+  const eighteenth = new Date(dob);
+  eighteenth.setFullYear(eighteenth.getFullYear() + 18);
+  return eighteenth > today;
+}
+
 const inputCls = (hasError?: boolean) =>
   `w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-    hasError ? "border-red-400 bg-red-50" : "border-gray-300"
+    hasError ? "border-red-600 bg-red-50" : "border-gray-500"
   }`;
 
 function ApplyForm() {
@@ -118,6 +159,8 @@ function ApplyForm() {
   const [cities, setCities] = useState<City[]>([]);
   const [listings, setListings] = useState<Listing[]>([]);
   const [selectedCitySlug, setSelectedCitySlug] = useState("");
+  const [manualReviewRequested, setManualReviewRequested] = useState(false);
+  const errorSummaryRef = React.useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     fetch("/api/cities")
@@ -159,6 +202,9 @@ function ApplyForm() {
     const errs = validate();
     if (Object.keys(errs).length > 0) {
       setErrors(errs);
+      // Without moving focus, a screen reader user gets no notification that
+      // submission failed — the page simply does nothing.
+      requestAnimationFrame(() => errorSummaryRef.current?.focus());
       return;
     }
     setErrors({});
@@ -167,7 +213,7 @@ function ApplyForm() {
       const res = await fetch("/api/applications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, signatureDate: today }),
+        body: JSON.stringify({ ...form, signatureDate: today, manualReviewRequested }),
       });
       if (!res.ok) throw new Error("Failed");
       setStatus("success");
@@ -184,7 +230,7 @@ function ApplyForm() {
         </h2>
         <p className="text-gray-600 mb-6 max-w-md mx-auto">
           Thank you! We&apos;ve received your application and will be in touch
-          within one business day.
+          as soon as we can.
         </p>
         <Link
           href="/"
@@ -196,18 +242,43 @@ function ApplyForm() {
     );
   }
 
+  const errorCount = Object.values(errors).filter(Boolean).length;
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-2">
+    <form onSubmit={handleSubmit} className="space-y-2" noValidate>
+      {/*
+        Validation summary. role="alert" announces it when it appears, and
+        tabIndex={-1} lets handleSubmit move focus here so the failure is
+        reported rather than silently colouring three fields red.
+      */}
+      <div
+        ref={errorSummaryRef}
+        tabIndex={-1}
+        role="alert"
+        className={`focus:outline-none ${
+          errorCount
+            ? "bg-red-50 border border-red-600 rounded-lg px-4 py-3 text-sm text-red-800 mb-4"
+            : "sr-only"
+        }`}
+      >
+        {errorCount > 0 &&
+          `Your application was not submitted. Please correct ${errorCount} ${
+            errorCount === 1 ? "field" : "fields"
+          } below.`}
+      </div>
+
       <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 text-sm text-blue-900 font-medium mb-6">
-        There is no application fee. Complete all sections below and we&apos;ll
-        be in touch within one business day.
+        Submitting this application is free. If we move forward, the background
+        check costs $41, paid to the screening company — details at the bottom of
+        this form. Complete all sections below and we&apos;ll be in touch as soon
+        as we can.
       </div>
 
       {/* Applicant Information */}
       <SectionHeader>Applicant Information</SectionHeader>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="sm:col-span-2">
-          <Field label="Name" required error={errors.applicantName}>
+          <Field label="Name" required error={errors.applicantName} fieldId="applicantName">
             <input
               type="text"
               value={form.applicantName}
@@ -237,7 +308,7 @@ function ApplyForm() {
             />
           </Field>
         </div>
-        <Field label="Phone #" required error={errors.phone}>
+        <Field label="Phone #" required error={errors.phone} fieldId="phone">
           <input
             type="tel"
             value={form.phone}
@@ -246,31 +317,42 @@ function ApplyForm() {
             className={inputCls(!!errors.phone)}
           />
         </Field>
-        <Field label="Social Security #">
-          <input
-            type="text"
-            value={form.ssn}
-            onChange={(e) => set("ssn", e.target.value)}
-            placeholder="XXX-XX-XXXX"
-            className={inputCls()}
-          />
-        </Field>
-        <Field label="Driver's License #">
-          <input
-            type="text"
-            value={form.driversLicense}
-            onChange={(e) => set("driversLicense", e.target.value)}
-            className={inputCls()}
-          />
-        </Field>
+        {/*
+          Date of birth is collected for one reason only: confirming the
+          applicant is 18 and can enter a lease. Saying so on the form is not
+          decoration — age is a protected characteristic in Illinois housing
+          (the Illinois Human Rights Act covers age 40 and over), so the narrow
+          purpose should be visible to the applicant and to anyone maintaining
+          this. It is never sent to the screening tool; see lib/screenTenant.ts.
+        */}
         <Field label="Birth Date">
           <input
             type="date"
             value={form.birthDate}
             onChange={(e) => set("birthDate", e.target.value)}
             className={inputCls()}
+            aria-describedby="birthDate-purpose"
           />
         </Field>
+        <p id="birthDate-purpose" className="-mt-3 text-xs text-gray-600">
+          Used only to confirm you are 18 or older.
+        </p>
+        {/*
+          Warn, but do not block — the owner's decision. A wrong year is more
+          likely than an actual minor applying, so this flags the problem
+          without trapping someone behind a typo. role="alert" announces it to
+          a screen reader when it appears.
+        */}
+        {isUnderEighteen(form.birthDate) && (
+          <p
+            role="alert"
+            className="-mt-2 rounded-lg border border-amber-600 bg-amber-50 px-3 py-2 text-xs text-amber-900 sm:col-span-2"
+          >
+            That date of birth is under 18. Applicants must be 18 or older to
+            enter a lease. If you typed it by mistake, please correct it — you
+            can still submit, and we will be in touch either way.
+          </p>
+        )}
         <div className="sm:col-span-2">
           <Field label="Current Place of Employment">
             <input
@@ -373,28 +455,11 @@ function ApplyForm() {
                 />
               </Field>
             </div>
-            <Field label="Spouse's Driver's License #">
-              <input
-                type="text"
-                value={form.spouseDriversLicense}
-                onChange={(e) => set("spouseDriversLicense", e.target.value)}
-                className={inputCls()}
-              />
-            </Field>
             <Field label="Spouse's Birth Date">
               <input
                 type="date"
                 value={form.spouseBirthDate}
                 onChange={(e) => set("spouseBirthDate", e.target.value)}
-                className={inputCls()}
-              />
-            </Field>
-            <Field label="Spouse's Social Security #">
-              <input
-                type="text"
-                value={form.spouseSsn}
-                onChange={(e) => set("spouseSsn", e.target.value)}
-                placeholder="XXX-XX-XXXX"
                 className={inputCls()}
               />
             </Field>
@@ -475,12 +540,20 @@ function ApplyForm() {
       {/* Household Information */}
       <SectionHeader>Household Information</SectionHeader>
       <div className="space-y-4">
-        <Field label="Names and ages of children residing with you">
-          <textarea
-            value={form.childrenResiding}
-            onChange={(e) => set("childrenResiding", e.target.value)}
-            rows={3}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+        {/*
+          Familial status is a protected class under the Fair Housing Act, so we
+          ask only for the total occupant count — which is what an occupancy
+          standard actually needs — instead of the names and ages of children.
+        */}
+        <Field label="Total number of people who would live in the home (including children)">
+          <input
+            type="number"
+            inputMode="numeric"
+            min={1}
+            value={form.occupantCount}
+            onChange={(e) => set("occupantCount", e.target.value)}
+            placeholder="e.g. 4"
+            className={`${inputCls()} sm:max-w-[12rem]`}
           />
         </Field>
         <Field label="Names of any adult (other than spouse) residing with you">
@@ -488,7 +561,7 @@ function ApplyForm() {
             value={form.adultsResiding}
             onChange={(e) => set("adultsResiding", e.target.value)}
             rows={2}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            className="w-full border border-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
           />
         </Field>
       </div>
@@ -586,7 +659,7 @@ function ApplyForm() {
               set("listingId", "");
               set("interest", "");
             }}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">— Select a city —</option>
             {cities.map((c) => (
@@ -603,7 +676,7 @@ function ApplyForm() {
                 set("listingId", e.target.value);
                 set("interest", listing?.title ?? "");
               }}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">— Select a unit —</option>
               {listings.map((l) => (
@@ -621,16 +694,87 @@ function ApplyForm() {
 
       {/* Disclosure */}
       <SectionHeader>Disclosure</SectionHeader>
-      <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-700">
-        I, the undersigned, represent that the above statements are true and
-        complete. I hereby authorize the disclosure of my credit information to
-        Blue Blaze Estates.
+      <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-700 space-y-3">
+        <p>
+          I represent that the statements in this application are true and
+          complete to the best of my knowledge. I authorize Blue Blaze Estates
+          to contact the employers and landlords I have listed in order to
+          verify this information.
+        </p>
+        <p>
+          <strong className="font-semibold">
+            How your application is reviewed.
+          </strong>{" "}
+          Blue Blaze Estates uses an automated tool to produce a preliminary
+          score and summary unless you choose manual review below. It considers your employment,
+          income, rental history and your answer to the criminal-history
+          question; it is not given your name, address, contact details, or who
+          would live in the home. That score is only a starting point — a person
+          at Blue Blaze Estates reviews every application and makes the final
+          decision. No application is approved or denied automatically. You may
+          ask us to set the automated summary aside and assess your application
+          manually, or to explain a decision, at{" "}
+          <a
+            href="mailto:blueblazeestates@gmail.com"
+            className="text-blue-900 underline underline-offset-2 hover:text-blue-700"
+          >
+            blueblazeestates@gmail.com
+          </a>{" "}
+          or 618-942-7624 and we will review it manually.
+        </p>
+        <p>
+          <strong className="font-semibold">Separate background checks.</strong>{" "}
+          We use Tenant Background Search for background screening, with
+          TransUnion SmartMove providing credit reports. Submitting this form
+          does not itself order that report. After your initial in-person
+          contact with us, you will receive a screening invitation. The
+          applicant pays $41 for the background check. The screening provider
+          has a separate authorization process. Do not include Social Security or
+          driver&apos;s license numbers in this form.
+        </p>
+        <p>
+          Blue Blaze Estates is an Equal Housing Opportunity provider. We do not
+          discriminate on the basis of race, color, religion, sex, national
+          origin, familial status, disability, or any other class protected by
+          federal or Illinois law.
+        </p>
+        <p>
+          See our{" "}
+          <Link
+            href="/privacy-policy"
+            className="text-blue-900 underline underline-offset-2 hover:text-blue-700"
+          >
+            Privacy Policy
+          </Link>{" "}
+          for how we handle the information on this form.
+        </p>
+
+        <div className="border-t border-gray-300 pt-3">
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={manualReviewRequested}
+              onChange={(e) => setManualReviewRequested(e.target.checked)}
+              className="mt-0.5 h-5 w-5 shrink-0 rounded border-gray-500 text-blue-900 focus:ring-2 focus:ring-blue-500"
+            />
+            <span>
+              <strong className="font-semibold">
+                Review my application manually instead.
+              </strong>{" "}
+              Tick this and we will not run the automated tool at all — none of
+              your information is sent to it, and a person reviews your
+              application from the start. This does not disadvantage your
+              application.
+            </span>
+          </label>
+        </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
         <Field
           label="Electronic Signature (type your full name)"
           required
           error={errors.electronicSignature}
+          fieldId="electronicSignature"
         >
           <input
             type="text"
@@ -671,7 +815,7 @@ export default function ApplyPage() {
   return (
     <>
       <Header />
-      <main className="max-w-3xl mx-auto px-6 py-12">
+      <main id="main-content" tabIndex={-1} className="max-w-3xl mx-auto px-6 py-12 focus:outline-none">
         <div className="mb-8">
           <Link
             href="/"
@@ -695,10 +839,10 @@ export default function ApplyPage() {
             Rental Application
           </h1>
           <p className="text-gray-500 mb-8">
-            Complete all sections and submit. We will contact you within one
-            business day.
+            Complete all sections and submit. We will contact you as soon as
+            we can.
           </p>
-          <Suspense fallback={<p className="text-gray-400">Loading form...</p>}>
+          <Suspense fallback={<p className="text-gray-600">Loading form...</p>}>
             <ApplyForm />
           </Suspense>
         </div>

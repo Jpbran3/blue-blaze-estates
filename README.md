@@ -36,6 +36,14 @@ npm run dev                  # http://localhost:3000
 - `app/admin/page.tsx` — owner dashboard (review applications, manage listings)
 - `lib/screenTenant.ts` — AI screening rules (felony, rent-to-income, etc.)
 - `prisma/seed.ts` — initial property group + sample listing
+- `app/privacy-policy`, `app/terms-and-conditions`, `app/accessibility` — legal pages (linked from the footer)
+- `lib/adminAuth.ts` — shared admin auth; fails closed when `ADMIN_PASSWORD` is unset
+- `next.config.ts` — security headers (CSP, X-Frame-Options, Referrer-Policy, …)
+
+## Compliance notes
+- **SSNs and driver's licence numbers are not collected.** The `ssn`, `spouseSsn`, `driversLicense` and `spouseDriversLicense` columns are retained for legacy rows only — never write to them.
+- **Household composition is never scored.** Familial status is protected under the Fair Housing Act; `lib/screenTenant.ts` withholds those fields from the model entirely.
+- Purge legacy SSN / driver's-licence / children data with `npm run db:purge-sensitive -- --dry-run`, then `-- --confirm`.
 
 ## Branding
 Name: **Blue Blaze Estates** · Colors: blue (`blue-900`) & white · Logo: BB + house badge (inline SVG in Header/Footer, standalone at `public/logo.svg`). Contact: 618-942-7624 · blueblazeestates@gmail.com.

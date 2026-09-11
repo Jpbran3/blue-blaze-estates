@@ -1,21 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
 import { screenTenant } from "@/lib/screenTenant";
+import { isAuthenticated } from "@/lib/adminAuth";
 
 // Give the function more time on Vercel Pro/Teams (hobby stays at 10s)
 export const maxDuration = 60;
 
-async function isAuthenticated() {
-  const cookieStore = await cookies();
-  const session = cookieStore.get("admin_session");
-  const adminPassword = (process.env.ADMIN_PASSWORD ?? "changeme").trim();
-  return (
-    session?.value ===
-    crypto.createHash("sha256").update(adminPassword).digest("hex")
-  );
-}
 
 const EDITABLE_FIELDS = [
   "applicantName",
@@ -24,8 +14,6 @@ const EDITABLE_FIELDS = [
   "interest",
   "presentAddress",
   "townStateZip",
-  "ssn",
-  "driversLicense",
   "birthDate",
   "employer",
   "employerAddress",
@@ -35,9 +23,7 @@ const EDITABLE_FIELDS = [
   "monthlyWages",
   "previousEmployer",
   "spouseName",
-  "spouseDriversLicense",
   "spouseBirthDate",
-  "spouseSsn",
   "spouseEmployer",
   "spouseEmployerAddress",
   "spouseEmployerTownStateZip",
@@ -45,7 +31,7 @@ const EDITABLE_FIELDS = [
   "spouseEmploymentDuration",
   "spouseMonthlyWages",
   "spousePreviousEmployer",
-  "childrenResiding",
+  "occupantCount",
   "adultsResiding",
   "currentLandlord",
   "currentLandlordPhone",
@@ -88,10 +74,12 @@ export async function PUT(
     data: updateData,
   });
 
-  // Re-run AI screening whenever content fields are edited.
-  // Always runs — status/archived-only updates don't contain any EDITABLE_FIELDS.
+  // Re-run AI screening whenever content fields are edited — unless the
+  // applicant asked for a human-only review. Honouring that preference on
+  // submission but silently re-screening on the next admin edit would break the
+  // promise made on the form and in the privacy policy.
   const hasContentChanges = EDITABLE_FIELDS.some((f) => f in body);
-  if (hasContentChanges) {
+  if (hasContentChanges && !application.manualReviewRequested) {
     const result = await screenTenant(application, application.rentPrice);
 
     // Only write the new score if the AI call actually succeeded (score > 0).
@@ -105,8 +93,9 @@ export async function PUT(
       return NextResponse.json(rescreened);
     }
 
-    // Screening failed — return the saved field changes but keep old score intact
-    console.error("Re-screening returned error score after admin edit:", result.summary);
+    // Screening failed — return the saved field changes but keep old score
+    // intact. Log the id only: the summary carries the applicant's income.
+    console.error("Re-screening returned an error score after admin edit:", id);
   }
 
   return NextResponse.json(application);

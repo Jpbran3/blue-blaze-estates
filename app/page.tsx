@@ -40,6 +40,7 @@ export default async function HomePage() {
     <>
       <Header />
 
+      <main id="main-content" tabIndex={-1} className="focus:outline-none">
       <HeroCarousel />
 
       {/* Features strip */}
@@ -66,7 +67,7 @@ export default async function HomePage() {
                 />
               ),
               title: "Fair Pricing",
-              desc: "Transparent, competitive rents with no hidden fees",
+              desc: "Transparent, competitive rents and a free application",
             },
             {
               icon: (
@@ -137,8 +138,8 @@ export default async function HomePage() {
             Ready to Apply?
           </h2>
           <p className="text-blue-100 mb-8 text-lg">
-            Fill out our quick application form and we&apos;ll be in touch
-            within one business day.
+            Fill out our quick application form and we&apos;ll be in touch as
+            soon as we can.
           </p>
           <Link
             href="/apply"
@@ -148,6 +149,7 @@ export default async function HomePage() {
           </Link>
         </div>
       </section>
+      </main>
 
       <Footer />
     </>

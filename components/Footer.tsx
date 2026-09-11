@@ -55,7 +55,7 @@ export default function Footer() {
             <h3 className="font-semibold mb-3 text-sm uppercase tracking-wider text-blue-300">
               Quick Links
             </h3>
-            <ul className="space-y-2 text-sm text-blue-200">
+            <ul className="space-y-2 text-sm text-blue-100">
               <li>
                 <Link href="/" className="hover:text-white transition-colors">
                   Home
@@ -64,6 +64,30 @@ export default function Footer() {
               <li>
                 <Link href="/apply" className="hover:text-white transition-colors">
                   Apply Now
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/privacy-policy"
+                  className="hover:text-white transition-colors"
+                >
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/terms-and-conditions"
+                  className="hover:text-white transition-colors"
+                >
+                  Terms &amp; Conditions
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/accessibility"
+                  className="hover:text-white transition-colors"
+                >
+                  Accessibility
                 </Link>
               </li>
             </ul>
@@ -95,8 +119,35 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-blue-800 mt-8 pt-6 text-center text-sm text-blue-300">
-          © {new Date().getFullYear()} Blue Blaze Estates. All rights reserved.
+        <div className="border-t border-blue-800 mt-8 pt-6 space-y-3 text-center text-sm text-blue-100">
+          <p className="flex items-center justify-center gap-2">
+            {/* Equal Housing Opportunity mark — house outline with an equals sign. */}
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.75"
+              className="shrink-0"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M3 11.5L12 4l9 7.5M5.5 10.5V20h13v-9.5"
+              />
+              <path strokeLinecap="round" d="M9 14h6M9 17h6" />
+            </svg>
+            <span>
+              Equal Housing Opportunity — we comply with the Fair Housing Act
+              and the Illinois Human Rights Act.
+            </span>
+          </p>
+          <p>
+            © {new Date().getFullYear()} Blue Blaze Estates. All rights
+            reserved.
+          </p>
         </div>
       </div>
     </footer>

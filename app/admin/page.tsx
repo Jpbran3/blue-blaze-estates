@@ -34,8 +34,6 @@ interface Application {
   presentAddress?: string | null;
   townStateZip?: string | null;
   phone: string;
-  ssn?: string | null;
-  driversLicense?: string | null;
   birthDate?: string | null;
   employer?: string | null;
   employerAddress?: string | null;
@@ -45,9 +43,7 @@ interface Application {
   monthlyWages?: string | null;
   previousEmployer?: string | null;
   spouseName?: string | null;
-  spouseDriversLicense?: string | null;
   spouseBirthDate?: string | null;
-  spouseSsn?: string | null;
   spouseEmployer?: string | null;
   spouseEmployerAddress?: string | null;
   spouseEmployerTownStateZip?: string | null;
@@ -55,7 +51,7 @@ interface Application {
   spouseEmploymentDuration?: string | null;
   spouseMonthlyWages?: string | null;
   spousePreviousEmployer?: string | null;
-  childrenResiding?: string | null;
+  occupantCount?: string | null;
   adultsResiding?: string | null;
   currentLandlord?: string | null;
   currentLandlordPhone?: string | null;
@@ -74,6 +70,7 @@ interface Application {
   rentPrice?: number | null;
   status: string;
   archived: boolean;
+  manualReviewRequested?: boolean;
   aiScore?: number | null;
   aiSummary?: string | null;
   createdAt: string;
@@ -88,8 +85,6 @@ const APPLICATION_FIELDS: [string, keyof Application][] = [
   ["Interest / Unit", "interest"],
   ["Present Address", "presentAddress"],
   ["Town, State, Zip", "townStateZip"],
-  ["SSN", "ssn"],
-  ["Driver's License #", "driversLicense"],
   ["Birth Date", "birthDate"],
   ["Employer", "employer"],
   ["Employer Address", "employerAddress"],
@@ -99,9 +94,7 @@ const APPLICATION_FIELDS: [string, keyof Application][] = [
   ["Monthly Wages", "monthlyWages"],
   ["Previous Employer", "previousEmployer"],
   ["Spouse Name", "spouseName"],
-  ["Spouse DL #", "spouseDriversLicense"],
   ["Spouse Birth Date", "spouseBirthDate"],
-  ["Spouse SSN", "spouseSsn"],
   ["Spouse Employer", "spouseEmployer"],
   ["Spouse Employer Address", "spouseEmployerAddress"],
   ["Spouse Employer Town/State/Zip", "spouseEmployerTownStateZip"],
@@ -109,7 +102,7 @@ const APPLICATION_FIELDS: [string, keyof Application][] = [
   ["Spouse Employment Duration", "spouseEmploymentDuration"],
   ["Spouse Monthly Wages", "spouseMonthlyWages"],
   ["Spouse Previous Employer", "spousePreviousEmployer"],
-  ["Children Residing", "childrenResiding"],
+  ["Total Occupants", "occupantCount"],
   ["Other Adults Residing", "adultsResiding"],
   ["Current Landlord", "currentLandlord"],
   ["Current Landlord Phone", "currentLandlordPhone"],
@@ -157,7 +150,7 @@ function printApplication(a: Application) {
   const title = `Rental Application — ${a.applicantName || "Applicant"}`;
 
   const html = `<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="utf-8" />
 <title>${escapeHtml(title)}</title>
@@ -181,7 +174,7 @@ function printApplication(a: Application) {
   <p class="meta">${escapeHtml(a.applicantName || "Applicant")} &middot; Submitted ${escapeHtml(submitted)}${a.rentPrice ? ` &middot; Listing rent $${a.rentPrice.toLocaleString()}/mo` : ""}</p>
   ${aiBlock}
   <table><tbody>${rows}</tbody></table>
-  <script>window.onload = function () { window.focus(); window.print(); };</script>
+
 </body>
 </html>`;
 
@@ -193,6 +186,8 @@ function printApplication(a: Application) {
   win.document.open();
   win.document.write(html);
   win.document.close();
+  win.focus();
+  win.print();
 }
 
 // ── Login ──────────────────────────────────────────────────────────────────────
@@ -207,21 +202,22 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
     e.preventDefault();
     setLoading(true);
     setError("");
-    const res = await fetch("/api/admin/auth", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password }),
-    });
-    setLoading(false);
-    if (res.ok) {
-      onLogin();
-    } else {
-      setError("Invalid password. Please try again.");
-    }
+    try {
+      const res = await fetch("/api/admin/auth", {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password }),
+      });
+      if (res.ok) onLogin();
+      else { const result = await res.json().catch(() => null); setError(result?.error || "Unable to sign in. Please try again."); }
+    } catch { setError("Unable to connect. Please try again."); }
+    finally { setLoading(false); }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <main
+      id="main-content"
+      tabIndex={-1}
+      className="min-h-screen flex items-center justify-center bg-gray-50 px-4 focus:outline-none"
+    >
       <div className="bg-white rounded-2xl shadow-lg p-10 w-full max-w-sm">
         <h1 className="font-display text-2xl font-bold text-gray-900 mb-2">Admin Login</h1>
         <p className="text-gray-500 text-sm mb-6">Blue Blaze Estates Dashboard</p>
@@ -232,12 +228,14 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
             </label>
             <input
               id="admin-password"
+              aria-invalid={!!error}
+              aria-describedby={error ? "login-error" : undefined}
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
               autoComplete="current-password"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 pr-16 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-500 rounded-lg px-4 py-3 pr-16 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button
               type="button"
@@ -248,7 +246,7 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
               {showPassword ? "Hide" : "Show"}
             </button>
           </div>
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {error && <p id="login-error" role="alert" className="text-red-700 text-sm">{error}</p>}
           <button
             type="submit"
             disabled={loading}
@@ -258,7 +256,7 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
           </button>
         </form>
       </div>
-    </div>
+    </main>
   );
 }
 
@@ -314,9 +312,9 @@ function MultiImageUploader({
 
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
-        Images{images.length > 0 && <span className="text-gray-400 font-normal ml-1">— first is main photo</span>}
-      </label>
+      <p className="block text-sm font-medium text-gray-700 mb-2">
+        Images{images.length > 0 && <span className="text-gray-600 font-normal ml-1">— first is main photo</span>}
+      </p>
       {images.length > 0 && (
         <div className="flex flex-wrap gap-3 mb-3">
           {images.map((url, i) => (
@@ -353,19 +351,19 @@ function MultiImageUploader({
           ))}
         </div>
       )}
-      <label className={`cursor-pointer inline-flex items-center gap-2 text-sm px-3 py-2 rounded-lg transition-colors ${progress ? "bg-gray-200 text-gray-400 cursor-not-allowed" : "bg-gray-100 hover:bg-gray-200 text-gray-700"}`}>
+      <label className={`focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-blue-900 cursor-pointer inline-flex items-center gap-2 text-sm px-3 py-2 rounded-lg transition-colors ${progress ? "bg-gray-200 text-gray-600 cursor-not-allowed" : "bg-gray-100 hover:bg-gray-200 text-gray-700"}`}>
         {progress ?? "+ Add Images"}
         <input
           type="file"
           accept="image/*"
           multiple
-          className="hidden"
+          className="sr-only"
           onChange={handleFiles}
           disabled={!!progress}
         />
       </label>
       {uploadError && (
-        <p className="mt-2 text-xs text-red-500">{uploadError}</p>
+        <p className="mt-2 text-xs text-red-700">{uploadError}</p>
       )}
     </div>
   );
@@ -397,18 +395,19 @@ function ImageUploader({
 
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">Image</label>
+      <label htmlFor="city-image-url" className="block text-sm font-medium text-gray-700 mb-1">Image</label>
       <div className="flex items-center gap-3">
         <input
           type="text"
           value={current ?? ""}
           onChange={(e) => onChange(e.target.value)}
+          id="city-image-url"
           placeholder="https://... or upload →"
-          className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 border border-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-        <label className="cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm px-3 py-2 rounded-lg transition-colors">
+        <label className="focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-blue-900 cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm px-3 py-2 rounded-lg transition-colors">
           {uploading ? "Uploading..." : "Upload"}
-          <input type="file" accept="image/*" className="hidden" onChange={handleFile} />
+          <input type="file" accept="image/*" className="sr-only" onChange={handleFile} />
         </label>
       </div>
       {current && (
@@ -534,8 +533,8 @@ function CitiesTab() {
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-              <input
+              <label htmlFor="admin-field-1" className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+              <input id="admin-field-1"
                 value={form.name}
                 onChange={(e) => {
                   const name = e.target.value;
@@ -551,28 +550,28 @@ function CitiesTab() {
                   }));
                 }}
                 placeholder="Edwardsville"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
-              <input
+              <label htmlFor="admin-field-2" className="block text-sm font-medium text-gray-700 mb-1">State</label>
+              <input id="admin-field-2"
                 value={form.state}
                 onChange={(e) => setForm({ ...form, state: e.target.value })}
                 placeholder="IL"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="admin-field-3" className="block text-sm font-medium text-gray-700 mb-1">
                 Slug{" "}
-                <span className="text-gray-400 font-normal">— auto-filled</span>
+                <span className="text-gray-600 font-normal">— auto-filled</span>
               </label>
-              <input
+              <input id="admin-field-3"
                 value={form.slug}
                 onChange={(e) => setForm({ ...form, slug: e.target.value })}
                 placeholder="edwardsville-il"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
@@ -581,7 +580,7 @@ function CitiesTab() {
             onChange={(url) => setForm({ ...form, imageUrl: url })}
           />
           {error && (
-            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+            <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
               {error}
             </p>
           )}
@@ -634,7 +633,7 @@ function CitiesTab() {
                   </button>
                   <button
                     onClick={() => del(c.id)}
-                    className="text-red-500 hover:text-red-700 text-xs font-medium"
+                    className="text-red-700 hover:text-red-700 text-xs font-medium"
                   >
                     Delete
                   </button>
@@ -643,7 +642,7 @@ function CitiesTab() {
             ))}
             {cities.length === 0 && (
               <tr>
-                <td colSpan={4} className="py-8 text-center text-gray-400">
+                <td colSpan={4} className="py-8 text-center text-gray-600">
                   No cities yet.
                 </td>
               </tr>
@@ -682,7 +681,13 @@ function ListingsTab() {
     setCities(await cr.json());
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    const controller = new AbortController();
+    Promise.all([fetch("/api/listings", { signal: controller.signal }), fetch("/api/cities", { signal: controller.signal })])
+      .then(async ([lr, cr]) => { if (lr.ok && cr.ok) { setListings(await lr.json()); setCities(await cr.json()); } })
+      .catch(() => {});
+    return () => controller.abort();
+  }, []);
 
   function openAdd() {
     setEditListing(null);
@@ -775,11 +780,11 @@ function ListingsTab() {
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
-              <select
+              <label htmlFor="admin-field-4" className="block text-sm font-medium text-gray-700 mb-1">City</label>
+              <select id="admin-field-4"
                 value={form.cityId}
                 onChange={(e) => setForm({ ...form, cityId: e.target.value })}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 {cities.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -789,11 +794,12 @@ function ListingsTab() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+              <span id="listing-status-label" className="block text-sm font-medium text-gray-700 mb-1">Status</span>
               <div className="flex items-center gap-3 h-[42px]">
                 <button
                   type="button"
                   role="switch"
+                  aria-labelledby="listing-status-label"
                   aria-checked={form.status === "available"}
                   onClick={() =>
                     setForm({
@@ -802,7 +808,7 @@ function ListingsTab() {
                     })
                   }
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                    form.status === "available" ? "bg-green-500" : "bg-gray-300"
+                    form.status === "available" ? "bg-green-700" : "bg-gray-500"
                   }`}
                 >
                   <span
@@ -821,58 +827,58 @@ function ListingsTab() {
               </div>
             </div>
             <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
-              <input
+              <label htmlFor="admin-field-5" className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+              <input id="admin-field-5"
                 value={form.title}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
                 placeholder="Cozy 2BR near downtown"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Bedrooms</label>
-              <input
+              <label htmlFor="admin-field-6" className="block text-sm font-medium text-gray-700 mb-1">Bedrooms</label>
+              <input id="admin-field-6"
                 type="number"
                 min="0"
                 value={form.bedrooms}
                 onChange={(e) => setForm({ ...form, bedrooms: e.target.value })}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Bathrooms</label>
-              <input
+              <label htmlFor="admin-field-7" className="block text-sm font-medium text-gray-700 mb-1">Bathrooms</label>
+              <input id="admin-field-7"
                 type="number"
                 min="0"
                 step="0.5"
                 value={form.bathrooms}
                 onChange={(e) => setForm({ ...form, bathrooms: e.target.value })}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="admin-field-8" className="block text-sm font-medium text-gray-700 mb-1">
                 Monthly Rent ($)
               </label>
-              <input
+              <input id="admin-field-8"
                 type="number"
                 min="0"
                 value={form.rentPrice}
                 onChange={(e) => setForm({ ...form, rentPrice: e.target.value })}
                 placeholder="1200"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="admin-field-9" className="block text-sm font-medium text-gray-700 mb-1">
                 Description
               </label>
-              <textarea
+              <textarea id="admin-field-9"
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                 placeholder="Brief description of the unit..."
                 rows={3}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                className="w-full border border-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
               />
             </div>
           </div>
@@ -929,10 +935,11 @@ function ListingsTab() {
                     <button
                       type="button"
                       role="switch"
+                      aria-label={`List ${l.title} as available`}
                       aria-checked={l.status === "available"}
                       onClick={() => toggleStatus(l)}
                       className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 ${
-                        l.status === "available" ? "bg-green-500" : "bg-gray-300"
+                        l.status === "available" ? "bg-green-700" : "bg-gray-500"
                       }`}
                     >
                       <span
@@ -959,7 +966,7 @@ function ListingsTab() {
                   </button>
                   <button
                     onClick={() => del(l.id)}
-                    className="text-red-500 hover:text-red-700 text-xs font-medium"
+                    className="text-red-700 hover:text-red-700 text-xs font-medium"
                   >
                     Delete
                   </button>
@@ -968,7 +975,7 @@ function ListingsTab() {
             ))}
             {listings.length === 0 && (
               <tr>
-                <td colSpan={6} className="py-8 text-center text-gray-400">
+                <td colSpan={6} className="py-8 text-center text-gray-600">
                   No listings yet.
                 </td>
               </tr>
@@ -990,7 +997,7 @@ function AiScoreBadge({ score }: { score?: number | null }) {
           score >= 8
             ? "bg-green-100 text-green-700"
             : score >= 5
-            ? "bg-yellow-100 text-yellow-700"
+            ? "bg-yellow-100 text-yellow-800"
             : score >= 2
             ? "bg-orange-100 text-orange-700"
             : "bg-red-100 text-red-700"
@@ -1001,7 +1008,7 @@ function AiScoreBadge({ score }: { score?: number | null }) {
     );
   }
   return (
-    <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-400">
+    <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
       Pending
     </span>
   );
@@ -1022,7 +1029,11 @@ function ApplicationsTab() {
     if (res.ok) setApps(await res.json());
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("/api/applications", { signal: controller.signal }).then(async res => { if (res.ok) setApps(await res.json()); }).catch(() => {});
+    return () => controller.abort();
+  }, []);
 
   async function markContacted(id: string) {
     await fetch(`/api/applications/${id}`, {
@@ -1107,7 +1118,7 @@ function ApplicationsTab() {
             className={`text-xs font-medium px-3 py-1.5 rounded-lg border transition-colors ${
               sortBy === "aiScore"
                 ? "bg-blue-900 text-white border-black"
-                : "bg-white text-gray-600 border-gray-300 hover:border-gray-500"
+                : "bg-white text-gray-600 border-gray-500 hover:border-gray-500"
             }`}
           >
             {sortBy === "aiScore" ? "Sorted by AI Score ▼" : "Sort by AI Score"}
@@ -1136,13 +1147,16 @@ function ApplicationsTab() {
                   onClick={() => toggle(a.id)}
                 >
                   <td className="py-3 pr-4 font-medium text-gray-800">
-                    {a.applicantName}
+                    <button type="button" aria-expanded={expandedId === a.id} onClick={e => { e.stopPropagation(); toggle(a.id); }} className="text-left underline underline-offset-2">
+                      {a.applicantName}
+                    </button>
+                    {a.manualReviewRequested && <span className="block text-xs text-blue-900">Manual review requested</span>}
                   </td>
                   <td className="py-3 pr-4 text-gray-600">{a.phone}</td>
                   <td className="py-3 pr-4 text-gray-500 hidden sm:table-cell max-w-[180px] truncate">
                     {a.interest ?? "—"}
                   </td>
-                  <td className="py-3 pr-4 text-gray-400 text-xs hidden md:table-cell whitespace-nowrap">
+                  <td className="py-3 pr-4 text-gray-600 text-xs hidden md:table-cell whitespace-nowrap">
                     {new Date(a.createdAt).toLocaleDateString("en-US", {
                       month: "short",
                       day: "numeric",
@@ -1163,7 +1177,7 @@ function ApplicationsTab() {
                   <td className="py-3 pr-4">
                     <AiScoreBadge score={a.aiScore} />
                   </td>
-                  <td className="py-3 text-right text-gray-400 text-xs pr-1">
+                  <td className="py-3 text-right text-gray-600 text-xs pr-1">
                     {expandedId === a.id ? "▲" : "▼"}
                   </td>
                 </tr>
@@ -1190,7 +1204,7 @@ function ApplicationsTab() {
                                   a.aiScore >= 8
                                     ? "text-green-700"
                                     : a.aiScore >= 5
-                                    ? "text-yellow-700"
+                                    ? "text-yellow-800"
                                     : a.aiScore >= 2
                                     ? "text-orange-700"
                                     : "text-red-700"
@@ -1213,7 +1227,7 @@ function ApplicationsTab() {
                           )}
                         </div>
                       ) : (
-                        <p className="mb-5 text-xs text-gray-400 italic">
+                        <p className="mb-5 text-xs text-gray-600 italic">
                           Screening pending...
                         </p>
                       )}
@@ -1223,15 +1237,16 @@ function ApplicationsTab() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3 text-sm mb-5">
                           {APPLICATION_FIELDS.map(([label, key]) => (
                             <div key={key as string}>
-                              <label className="block text-gray-400 text-xs uppercase tracking-wide mb-0.5">
+                              <label htmlFor={`application-${a.id}-${String(key)}`} className="block text-gray-600 text-xs uppercase tracking-wide mb-0.5">
                                 {label}
                               </label>
                               <input
+                                id={`application-${a.id}-${String(key)}`}
                                 value={editDraft[key as string] ?? ""}
                                 onChange={(e) =>
                                   setEditDraft((d) => ({ ...d, [key as string]: e.target.value }))
                                 }
-                                className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                className="w-full border border-gray-500 rounded-md px-2 py-1 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
                               />
                             </div>
                           ))}
@@ -1240,10 +1255,10 @@ function ApplicationsTab() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4 text-sm mb-5">
                           {APPLICATION_FIELDS.map(([label, key]) => (
                             <div key={key as string}>
-                              <p className="text-gray-400 text-xs uppercase tracking-wide mb-0.5">
+                              <p className="text-gray-600 text-xs uppercase tracking-wide mb-0.5">
                                 {label}
                               </p>
-                              <p className={`font-medium whitespace-pre-wrap ${a[key] ? "text-gray-700" : "text-gray-300"}`}>
+                              <p className={`font-medium whitespace-pre-wrap ${a[key] ? "text-gray-700" : "text-gray-600"}`}>
                                 {a[key] ? String(a[key]) : "—"}
                               </p>
                             </div>
@@ -1292,13 +1307,13 @@ function ApplicationsTab() {
                             </button>
                             <button
                               onClick={(e) => { e.stopPropagation(); archive(a.id); }}
-                              className="bg-yellow-50 hover:bg-yellow-100 text-yellow-700 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+                              className="bg-yellow-50 hover:bg-yellow-100 text-yellow-800 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
                             >
                               Archive
                             </button>
                             <button
                               onClick={(e) => { e.stopPropagation(); del(a.id); }}
-                              className="bg-red-100 hover:bg-red-200 text-red-600 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+                              className="bg-red-100 hover:bg-red-200 text-red-700 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
                             >
                               Delete
                             </button>
@@ -1312,7 +1327,7 @@ function ApplicationsTab() {
             ))}
             {sortedApps.length === 0 && (
               <tr>
-                <td colSpan={7} className="py-8 text-center text-gray-400">
+                <td colSpan={7} className="py-8 text-center text-gray-600">
                   No applications yet.
                 </td>
               </tr>
@@ -1338,7 +1353,11 @@ function ArchiveTab() {
     if (res.ok) setApps(await res.json());
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("/api/applications?archived=true", { signal: controller.signal }).then(async res => { if (res.ok) setApps(await res.json()); }).catch(() => {});
+    return () => controller.abort();
+  }, []);
 
   async function unarchive(id: string) {
     await fetch(`/api/applications/${id}`, {
@@ -1422,13 +1441,16 @@ function ArchiveTab() {
                   onClick={() => toggle(a.id)}
                 >
                   <td className="py-3 pr-4 font-medium text-gray-500">
-                    {a.applicantName}
+                    <button type="button" aria-expanded={expandedId === a.id} onClick={e => { e.stopPropagation(); toggle(a.id); }} className="text-left underline underline-offset-2">
+                      {a.applicantName}
+                    </button>
+                    {a.manualReviewRequested && <span className="block text-xs text-blue-900">Manual review requested</span>}
                   </td>
                   <td className="py-3 pr-4 text-gray-500">{a.phone}</td>
-                  <td className="py-3 pr-4 text-gray-400 hidden sm:table-cell max-w-[180px] truncate">
+                  <td className="py-3 pr-4 text-gray-600 hidden sm:table-cell max-w-[180px] truncate">
                     {a.interest ?? "—"}
                   </td>
-                  <td className="py-3 pr-4 text-gray-400 text-xs hidden md:table-cell whitespace-nowrap">
+                  <td className="py-3 pr-4 text-gray-600 text-xs hidden md:table-cell whitespace-nowrap">
                     {new Date(a.createdAt).toLocaleDateString("en-US", {
                       month: "short",
                       day: "numeric",
@@ -1436,14 +1458,14 @@ function ArchiveTab() {
                     })}
                   </td>
                   <td className="py-3 pr-4">
-                    <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-400">
+                    <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
                       {a.status}
                     </span>
                   </td>
                   <td className="py-3 pr-4">
                     <AiScoreBadge score={a.aiScore} />
                   </td>
-                  <td className="py-3 text-right text-gray-400 text-xs pr-1">
+                  <td className="py-3 text-right text-gray-600 text-xs pr-1">
                     {expandedId === a.id ? "▲" : "▼"}
                   </td>
                 </tr>
@@ -1469,7 +1491,7 @@ function ArchiveTab() {
                                   a.aiScore >= 8
                                     ? "text-green-700"
                                     : a.aiScore >= 5
-                                    ? "text-yellow-700"
+                                    ? "text-yellow-800"
                                     : a.aiScore >= 2
                                     ? "text-orange-700"
                                     : "text-red-700"
@@ -1497,15 +1519,16 @@ function ArchiveTab() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3 text-sm mb-5">
                           {APPLICATION_FIELDS.map(([label, key]) => (
                             <div key={key as string}>
-                              <label className="block text-gray-400 text-xs uppercase tracking-wide mb-0.5">
+                              <label htmlFor={`application-${a.id}-${String(key)}`} className="block text-gray-600 text-xs uppercase tracking-wide mb-0.5">
                                 {label}
                               </label>
                               <input
+                                id={`application-${a.id}-${String(key)}`}
                                 value={editDraft[key as string] ?? ""}
                                 onChange={(e) =>
                                   setEditDraft((d) => ({ ...d, [key as string]: e.target.value }))
                                 }
-                                className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                className="w-full border border-gray-500 rounded-md px-2 py-1 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
                               />
                             </div>
                           ))}
@@ -1514,10 +1537,10 @@ function ArchiveTab() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4 text-sm mb-5">
                           {APPLICATION_FIELDS.map(([label, key]) => (
                             <div key={key as string}>
-                              <p className="text-gray-400 text-xs uppercase tracking-wide mb-0.5">
+                              <p className="text-gray-600 text-xs uppercase tracking-wide mb-0.5">
                                 {label}
                               </p>
-                              <p className={`font-medium whitespace-pre-wrap ${a[key] ? "text-gray-700" : "text-gray-300"}`}>
+                              <p className={`font-medium whitespace-pre-wrap ${a[key] ? "text-gray-700" : "text-gray-600"}`}>
                                 {a[key] ? String(a[key]) : "—"}
                               </p>
                             </div>
@@ -1552,13 +1575,13 @@ function ArchiveTab() {
                             </button>
                             <button
                               onClick={(e) => { e.stopPropagation(); unarchive(a.id); }}
-                              className="bg-yellow-50 hover:bg-yellow-100 text-yellow-700 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+                              className="bg-yellow-50 hover:bg-yellow-100 text-yellow-800 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
                             >
                               Unarchive
                             </button>
                             <button
                               onClick={(e) => { e.stopPropagation(); del(a.id); }}
-                              className="bg-red-100 hover:bg-red-200 text-red-600 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+                              className="bg-red-100 hover:bg-red-200 text-red-700 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
                             >
                               Delete
                             </button>
@@ -1572,7 +1595,7 @@ function ArchiveTab() {
             ))}
             {apps.length === 0 && (
               <tr>
-                <td colSpan={7} className="py-8 text-center text-gray-400">
+                <td colSpan={7} className="py-8 text-center text-gray-600">
                   No archived applications.
                 </td>
               </tr>
@@ -1598,6 +1621,12 @@ function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-blue-900 focus:shadow-lg"
+      >
+        Skip to main content
+      </a>
       <header className="bg-blue-900 text-white px-6 py-4 flex justify-between items-center">
         <h1 className="font-display text-xl font-bold">Blue Blaze Estates — Admin</h1>
         <button
@@ -1608,9 +1637,9 @@ function Dashboard() {
         </button>
       </header>
 
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Tabs */}
-        <div className="flex border-b border-gray-200 mb-8">
+      <main id="main-content" tabIndex={-1} className="max-w-6xl mx-auto px-4 py-8">
+        {/* Dashboard navigation */}
+        <nav aria-label="Dashboard sections" className="flex flex-wrap border-b border-gray-200 mb-8">
           {(["applications", "archive", "listings", "cities"] as Tab[]).map((t) => (
             <button
               key={t}
@@ -1625,7 +1654,7 @@ function Dashboard() {
               {t}
             </button>
           ))}
-        </div>
+        </nav>
 
         <div className="bg-white rounded-xl shadow-sm p-6">
           {tab === "applications" && <ApplicationsTab />}
@@ -1633,7 +1662,7 @@ function Dashboard() {
           {tab === "listings" && <ListingsTab />}
           {tab === "cities" && <CitiesTab />}
         </div>
-      </div>
+      </main>
     </div>
   );
 }
@@ -1651,12 +1680,12 @@ export default function AdminPage() {
 
   if (authed === null) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-gray-400">
+      <main id="main-content" tabIndex={-1} role="status" className="min-h-screen flex items-center justify-center text-gray-600">
         Loading...
-      </div>
+      </main>
     );
   }
 
-  if (!authed) return <LoginForm onLogin={() => setAuthed(true)} />;
+  if (!authed) return <main id="main-content" tabIndex={-1}><LoginForm onLogin={() => setAuthed(true)} /></main>;
   return <Dashboard />;
 }

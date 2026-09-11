@@ -1,0 +1,11 @@
+-- Replaces the free-text "names and ages of children residing with you" field
+-- with a plain household size. Familial status is a protected class under the
+-- Fair Housing Act; an occupancy standard only needs a count.
+--
+-- The old `childrenResiding`, `ssn`, and `spouseSsn` columns are intentionally
+-- NOT dropped here: dropping them would destroy data on rows already submitted
+-- by real applicants. The application code no longer reads or writes any of
+-- them. Purge the values with `npm run db:purge-ssn`, then drop the columns in
+-- a separate, deliberate migration.
+-- AlterTable
+ALTER TABLE "Application" ADD COLUMN "occupantCount" TEXT;

@@ -69,7 +69,8 @@ export default function Header() {
         <button
           className="md:hidden flex items-center justify-center h-11 w-11 -mr-2 rounded-md hover:bg-blue-800 transition-colors cursor-pointer"
           onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="Toggle menu"
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
+          aria-controls="mobile-navigation"
           aria-expanded={menuOpen}
         >
           <svg
@@ -91,7 +92,7 @@ export default function Header() {
 
       {/* Mobile Menu */}
       {menuOpen && (
-        <div className="md:hidden bg-blue-950 px-4 pb-4 flex flex-col gap-3 text-sm font-medium">
+        <nav id="mobile-navigation" aria-label="Mobile navigation" className="md:hidden bg-blue-950 px-4 pb-4 flex flex-col gap-3 text-sm font-medium">
           <Link
             href="/"
             className="hover:text-blue-200 transition-colors py-1"
@@ -106,7 +107,7 @@ export default function Header() {
           >
             Apply Now
           </Link>
-        </div>
+        </nav>
       )}
     </header>
   );

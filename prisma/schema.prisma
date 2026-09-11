@@ -43,7 +43,13 @@ model Application {
   presentAddress             String?
   townStateZip               String?
   phone                      String
+  /// DEPRECATED — no longer collected or written. Retained so existing rows are
+  /// not destroyed by a migration. Purge with `npm run db:purge-ssn` once the
+  /// owner has confirmed, then drop the column in a follow-up migration.
   ssn                        String?
+  /// DEPRECATED — no longer collected or written. Retained so existing rows are
+  /// not destroyed. Purge with `npm run db:purge-sensitive`, then drop the
+  /// column in a follow-up migration.
   driversLicense             String?
   birthDate                  String?
   employer                   String?
@@ -54,8 +60,10 @@ model Application {
   monthlyWages               String?
   previousEmployer           String?
   spouseName                 String?
+  /// DEPRECATED — see `driversLicense` above. No longer collected or written.
   spouseDriversLicense       String?
   spouseBirthDate            String?
+  /// DEPRECATED — see `ssn` above. No longer collected or written.
   spouseSsn                  String?
   spouseEmployer             String?
   spouseEmployerAddress      String?
@@ -64,7 +72,12 @@ model Application {
   spouseEmploymentDuration   String?
   spouseMonthlyWages         String?
   spousePreviousEmployer     String?
+  /// DEPRECATED — replaced by `occupantCount`. Collecting names and ages of
+  /// children invites a familial-status (Fair Housing Act) claim. Retained only
+  /// so existing rows survive; never write to it.
   childrenResiding           String?
+  /// Total household size — what an occupancy standard actually needs.
+  occupantCount              String?
   adultsResiding             String?
   currentLandlord            String?
   currentLandlordPhone       String?
@@ -85,6 +98,19 @@ model Application {
   status                     String   @default("new")
   aiScore                    Int?
   aiSummary                  String?
+  /// Applicant asked for a human-only review. When true the automated screening
+  /// is skipped entirely — on submission and on every later admin edit.
+  manualReviewRequested      Boolean  @default(false)
   archived                   Boolean  @default(false)
   createdAt                  DateTime @default(now())
+}
+
+/// Rate-limit counters. Shared across serverless instances, so limits actually
+/// hold. Stores a SHA-256 of scope+IP, never a raw IP address.
+model RateLimit {
+  key      String @id
+  attempts Int
+  resetAt  BigInt
+
+  @@index([resetAt])
 }

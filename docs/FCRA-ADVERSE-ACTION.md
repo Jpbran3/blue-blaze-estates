@@ -152,7 +152,11 @@ CREDIT component — supplied via TransUnion
 
 CRIMINAL and EVICTION components — supplied by Tenant Background Search
     Tenant Background Search
-    [NEEDS OWNER INPUT: mailing address — not published on their site; ask them]
+    [NEEDS OWNER INPUT: mailing address. NOT published on their website — the owner
+     checked. Get it from (a) the report itself, which normally prints the furnisher's
+     notice address, or (b) Tenant Background Search directly on 1-844-205-0177 or
+     support@tenantbackgroundsearch.com. This does NOT go on the website; it goes on
+     the denial letter, and the FCRA requires name, address AND phone there.]
     1-844-205-0177
     support@tenantbackgroundsearch.com
     (published hours: Mon–Fri 9:00–17:00 Central)

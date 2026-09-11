@@ -84,7 +84,8 @@ search traffic from people looking for that program by name.
 | Driver's licence numbers not collected | 2026-09-09 | Same treatment. |
 | Date of birth retained | 2026-09-09 | Sole purpose: confirming the applicant is 18. Never sent to the screening model. |
 | Under-18 dates: warn, do not block | 2026-09-11 | The form shows a warning but still accepts the submission. A minor's application can therefore still be stored. |
-| Applications retained indefinitely | 2026-09-10 | Owner's choice, stated plainly in the privacy policy with a deletion-request path. Does **not** extend to consumer reports, which carry separate FCRA disposal duties. |
+| ~~Applications retained indefinitely~~ **superseded** | 2026-09-10 | Replaced by the row below. |
+| Applications kept until the unit is filled | 2026-09-11 | Owner revised the retention period. A shorter, defensible period — better than indefinite. Assumption made in the privacy policy wording: an application that **leads to a tenancy** is kept as part of the tenant file for the duration of the tenancy. Confirm that reading. Does **not** extend to consumer reports, which carry separate FCRA disposal duties. |
 | Consumer report copies downloaded and kept | 2026-09-10 | Triggers the FTC Disposal Rule. See `docs/FCRA-ADVERSE-ACTION.md`. |
 | Report copies kept until tenant leaves the property | 2026-09-11 | Owner-confirmed for tenants. **Does not cover denied applicants**, who never become tenants — that disposal trigger is still undecided and is the larger group. |
 | Screening split confirmed | 2026-09-11 | Credit via TransUnion; criminal and eviction supplied by Tenant Background Search itself. A notice may need to name both agencies. |

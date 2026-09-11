@@ -55,6 +55,8 @@ Thresholds were preserved exactly as the owner asked and are locked by tests in
 | Under-18 dates: warn, do not block | 2026-09-11 | The form shows a warning but still accepts the submission. A minor's application can therefore still be stored. |
 | Applications retained indefinitely | 2026-09-10 | Owner's choice, stated plainly in the privacy policy with a deletion-request path. Does **not** extend to consumer reports, which carry separate FCRA disposal duties. |
 | Consumer report copies downloaded and kept | 2026-09-10 | Triggers the FTC Disposal Rule. See `docs/FCRA-ADVERSE-ACTION.md`. |
+| Report copies kept until tenant leaves the property | 2026-09-11 | Owner-confirmed for tenants. **Does not cover denied applicants**, who never become tenants — that disposal trigger is still undecided and is the larger group. |
+| Screening split confirmed | 2026-09-11 | Credit via TransUnion; criminal and eviction supplied by Tenant Background Search itself. A notice may need to name both agencies. |
 | Blue Blaze sends adverse-action notices | 2026-09-10 | Not the vendor. The notice template still needs the CRA's exact notice address and phone from the Tenant Background Search account. |
 
 ---
@@ -70,6 +72,12 @@ Thresholds were preserved exactly as the owner asked and are locked by tests in
   this account, and the furnisher details for the criminal and eviction
   components, which may come from a different agency (their site lists CoreLogic
   and BDS among its sources). Always check the specific report before sending.
+- **Tenant Background Search's mailing address.** Their phone (1-844-205-0177) and
+  support email are published; no mailing address is. An adverse action notice must
+  carry name, address AND phone, so this blocks any criminal- or eviction-based denial.
+  One question to them settles it.
+- **A disposal trigger for denied applicants' report copies.** "Until the tenant leaves"
+  does not apply to someone who never became a tenant.
 - **Which screening package** is ordered, and whether a credit score is
   returned and used (score disclosures are required if so).
 - **Where report copies are stored, who can access them, and the disposal

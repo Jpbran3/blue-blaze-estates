@@ -136,15 +136,43 @@ supplies. Two gaps remain, and both matter:
 2. **The report itself is authoritative.** Each report normally names its furnisher. If a
    report names a different agency or a different address, use what the report says.
 
-Record the confirmed answer here once the vendor replies:
+### Owner-confirmed split — 2026-09-11
+
+The owner confirms: **Tenant Background Search uses TransUnion for the credit report and
+supplies the criminal and eviction records itself.** So two different agencies can be
+involved depending on what the decision rested on.
 
 ```
-Credit component:   TransUnion Rental Screening Solutions, Inc. (see above) — confirm
-Criminal component: [NEEDS OWNER INPUT: furnisher name, address, phone]
-Eviction component: [NEEDS OWNER INPUT: furnisher name, address, phone]
-[NEEDS OWNER INPUT: confirmation from Tenant Background Search that the above is correct
-for this account, or a sample adverse action notice from their platform]
+CREDIT component — supplied via TransUnion
+    TransUnion Rental Screening Solutions, Inc.
+    Attention: Consumer Dispute Team
+    P.O. Box 800
+    Woodlyn, PA 19094
+    800-230-9376 (option 4)
+
+CRIMINAL and EVICTION components — supplied by Tenant Background Search
+    Tenant Background Search
+    [NEEDS OWNER INPUT: mailing address — not published on their site; ask them]
+    1-844-205-0177
+    support@tenantbackgroundsearch.com
+    (published hours: Mon–Fri 9:00–17:00 Central)
 ```
+
+**The mailing address is the one piece still missing and the notice legally needs it.**
+A phone number alone does not satisfy the requirement to identify the agency with its
+address. Ask Tenant Background Search directly — one line is enough:
+
+> For FCRA adverse action notices, what is the mailing address we must print for
+> applicants to request a free copy of their report and dispute its accuracy?
+
+Note on upstream sources: Tenant Background Search lists CoreLogic and BDS among its data
+providers. That does not change who you name — the notice identifies the agency that
+supplied **the report to you**, which is Tenant Background Search for those components.
+Their upstream suppliers are their business, not the applicant's contact point.
+
+**If the decision rested on both credit and criminal/eviction information, name both
+agencies.** Naming only one sends the applicant to a company that cannot help with half
+the report.
 
 Re-verify this against each report before sending a notice; if a report names a different
 furnisher, use the one on that report.
@@ -374,10 +402,21 @@ Who may access them
   [NEEDS OWNER INPUT: named people or roles with access to the copies above, and whether
    anyone outside the business can reach them]
 
-Retention period for report copies
-  [NEEDS OWNER INPUT: how long a report copy is kept after the rental decision — set a
-   definite period; see the recommendation above. This is a separate decision from the
-   indefinite retention of applications.]
+Retention period for report copies — owner-confirmed 2026-09-11
+  APPROVED APPLICANTS WHO BECOME TENANTS:
+    Report copies are kept until the tenant is removed from the property, then disposed
+    of securely. This is the owner's stated practice.
+
+  ⚠️ DENIED APPLICANTS — NOT YET COVERED, AND THIS IS THE LARGER GROUP
+    "Until the tenant is removed from the property" has no meaning for someone who never
+    became a tenant. Applicants you turn down still generated a report, and those copies
+    would otherwise be kept forever with no trigger to destroy them — which is the exact
+    situation the Disposal Rule exists to prevent, and it is also the group most likely
+    to dispute a report later.
+    [NEEDS OWNER INPUT: how long a report copy is kept for an applicant who was NOT
+     approved. A common choice is a fixed period after the decision, long enough to
+     answer a dispute or a fair-housing enquiry but not indefinite. Pick a period and
+     apply it.]
 
 Disposal trigger and practice
   Trigger:             [NEEDS OWNER INPUT: what starts disposal — e.g. retention period

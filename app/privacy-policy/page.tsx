@@ -10,11 +10,11 @@ export const metadata: Metadata = {
 
 export default function PrivacyPolicyPage() {
   return (
-    <LegalPage title="Privacy Policy" effectiveDate="September 7, 2026">
+    <LegalPage title="Privacy Policy" effectiveDate="September 10, 2026">
       <p>
-        This policy explains what information Blue Blaze Estates
-        {" "}<em>[NEEDS OWNER INPUT: exact legal entity name, e.g. &ldquo;Blue Blaze
-        Estates LLC&rdquo;]</em>{" "}
+        This policy explains what information Blue Blaze Estates, operated by
+        BLUE BLAZE MHP LLC,
+        {" "}
         (&ldquo;we,&rdquo; &ldquo;us&rdquo;) collects through this website, how
         we use it, and the choices you have. It applies to
         blueblazeestates.com only.
@@ -42,11 +42,10 @@ export default function PrivacyPolicyPage() {
           We do not ask for your Social Security number or your driver&apos;s
           licence number on this website.
         </strong>{" "}
-        We deliberately do not collect the two pieces of information most useful
-        to an identity thief, so that a breach of this site could not expose
-        them. If a rental is approved, any additional information needed to
-        prepare a lease is collected separately and directly, not through this
-        site.
+        Any identity information required by the separate background-check
+        provider is handled through that provider&apos;s process. Additional
+        information needed to prepare a lease is collected separately, not
+        through this website&apos;s application form.
       </p>
       <p>
         <strong>Basic technical information.</strong> Like any website, our host
@@ -76,7 +75,10 @@ export default function PrivacyPolicyPage() {
       <h2>Automated review of applications</h2>
       <p>
         We use an automated tool to produce a preliminary score and written
-        summary of each application. It runs automatically when you submit.
+        summary of an application when you submit, unless you select
+        &ldquo;Review my application manually instead.&rdquo; Selecting that
+        option skips the automated tool entirely: none of your application
+        information is sent to it, and a person reviews your application.
       </p>
       <p>
         <strong>Exactly what is sent to that tool:</strong> the monthly rent of
@@ -100,16 +102,45 @@ export default function PrivacyPolicyPage() {
           The score does not decide anything. A person at Blue Blaze Estates
           reviews every application and makes the final decision.
         </strong>{" "}
-        Because the tool runs at the moment you submit, we cannot prevent it from
-        producing a summary — but you may ask us to set that summary aside and
-        assess your application manually, and to explain any decision. Contact us
-        using the details below and we will do so.
+        You may choose manual review before submitting. If a summary has already
+        been produced, you may also ask us to set it aside, assess your
+        application manually, and explain a decision. Contact us using the
+        details below and we will do so. Choosing manual review does not
+        disadvantage your application.
       </p>
       <p>
         To produce that summary, the information listed above — and only that
         information — is sent to our service provider Anthropic, PBC, which
         operates the automated tool. It is used to generate your summary and is
         not used to train their models.
+      </p>
+
+      <h2>Separate background and credit checks</h2>
+      <p>
+        We use Tenant Background Search for rental background screening. Its
+        privacy policy identifies TransUnion SmartMove, provided by TransUnion
+        Rental Screening Solutions, Inc., as its credit-report service. The
+        reports available depend on the screening package selected.
+      </p>
+      <p>
+        This is separate from the automated application-summary tool described
+        above. Submitting this website&apos;s application does not itself order a
+        Tenant Background Search report. After the initial in-person contact,
+        applicants receive a screening invitation and pay $41 for the background
+        check. The provider describes a separate
+        online authorization process sent to the applicant by email. Follow the
+        provider&apos;s instructions for identity verification; do not send us
+        your Social Security number through this website or by email.
+      </p>
+      <p>
+        Information provided to the screening services is governed by their own
+        privacy notices: <a href="https://www.tenantbackgroundsearch.com/privacy.cfm">
+          Tenant Background Search
+        </a>{" "}
+        and <a href="https://www.transunion.com/privacy/rental-screening-services">
+          TransUnion Rental Screening Solutions
+        </a>. To dispute information in a report, use the reporting agency&apos;s
+        contact information and dispute instructions supplied with that report.
       </p>
 
       <h2>Who else your information reaches</h2>
@@ -128,6 +159,11 @@ export default function PrivacyPolicyPage() {
         <li>
           <strong>Anthropic, PBC</strong> — the automated application-summary
           tool described above.
+        </li>
+        <li>
+          <strong>Tenant Background Search and TransUnion Rental Screening
+          Solutions, Inc.</strong> — the separate background and credit screening
+          process described above.
         </li>
         <li>
           The employers and landlords you list, when we contact them to verify
@@ -152,13 +188,10 @@ export default function PrivacyPolicyPage() {
 
       <h2>How long we keep it</h2>
       <p>
-        <em>
-          [NEEDS OWNER INPUT: how long applications are retained — e.g.
-          &ldquo;applications that do not result in a tenancy are deleted after
-          12 months.&rdquo; Illinois has no fixed rule, but keeping applicant
-          data indefinitely increases both risk and obligation. Pick a period
-          and hold to it.]
-        </em>
+        We keep rental applications on file indefinitely, including applications
+        that do not result in a tenancy, unless deletion is required by applicable
+        law. You may request deletion using the contact details below. We review
+        these requests in accordance with applicable law.
       </p>
 
       <h2>How we protect it</h2>
@@ -208,7 +241,11 @@ export default function PrivacyPolicyPage() {
       <p>
         Blue Blaze Estates
         <br />
-        <em>[NEEDS OWNER INPUT: business mailing address]</em>
+        BLUE BLAZE MHP LLC
+        <br />
+        3309 Robbins Road #106
+        <br />
+        Springfield, Illinois 62704
         <br />
         Phone: <a href="tel:6189427624">618-942-7624</a>
         <br />

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function AccessibilityPage() {
   return (
-    <LegalPage title="Accessibility Statement" effectiveDate="September 7, 2026">
+    <LegalPage title="Accessibility Statement" effectiveDate="September 10, 2026">
       <p>
         Blue Blaze Estates wants every person looking for a home to be able to
         use this website, including people who use screen readers, keyboard
@@ -117,10 +117,8 @@ export default function AccessibilityPage() {
         </a>
       </p>
       <p>
-        We aim to respond within{" "}
-        <em>[NEEDS OWNER INPUT: response commitment — e.g. &ldquo;two business
-        days&rdquo;]</em>
-        . If you cannot complete the rental application on this website for any
+        We aim to respond within one week. If you cannot complete the rental
+        application on this website for any
         reason, call us and we will take your application over the phone or in
         person. You will not be disadvantaged for applying that way.
       </p>

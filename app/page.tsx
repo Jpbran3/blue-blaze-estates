@@ -67,7 +67,7 @@ export default async function HomePage() {
                 />
               ),
               title: "Fair Pricing",
-              desc: "Transparent, competitive rents and no application fee",
+              desc: "Transparent, competitive rents and a free application",
             },
             {
               icon: (

@@ -250,8 +250,10 @@ function ApplyForm() {
       </div>
 
       <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 text-sm text-blue-900 font-medium mb-6">
-        There is no application fee. Complete all sections below and we&apos;ll
-        be in touch as soon as we can.
+        Submitting this application is free. If we move forward, the background
+        check costs $41, paid to the screening company — details at the bottom of
+        this form. Complete all sections below and we&apos;ll be in touch as soon
+        as we can.
       </div>
 
       {/* Applicant Information */}
@@ -670,7 +672,7 @@ function ApplyForm() {
             How your application is reviewed.
           </strong>{" "}
           Blue Blaze Estates uses an automated tool to produce a preliminary
-          score and summary of each application. It considers your employment,
+          score and summary unless you choose manual review below. It considers your employment,
           income, rental history and your answer to the criminal-history
           question; it is not given your name, address, contact details, or who
           would live in the home. That score is only a starting point — a person
@@ -685,6 +687,16 @@ function ApplyForm() {
             blueblazeestates@gmail.com
           </a>{" "}
           or 618-942-7624 and we will review it manually.
+        </p>
+        <p>
+          <strong className="font-semibold">Separate background checks.</strong>{" "}
+          We use Tenant Background Search for background screening, with
+          TransUnion SmartMove providing credit reports. Submitting this form
+          does not itself order that report. After your initial in-person
+          contact with us, you will receive a screening invitation. The
+          applicant pays $41 for the background check. The screening provider
+          has a separate authorization process. Do not include Social Security or
+          driver&apos;s license numbers in this form.
         </p>
         <p>
           Blue Blaze Estates is an Equal Housing Opportunity provider. We do not

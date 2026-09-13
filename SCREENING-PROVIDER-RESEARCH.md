@@ -21,14 +21,14 @@ Before finalizing an operational notice/template, confirm the actual reporting a
 
 - The applicant pays $41 for screening. Use this owner-confirmed fee; do not substitute a publicly advertised package price or infer a package from the amount.
 - The screening invitation is sent after the initial in-person contact. No website email field has been added.
-- The owner says "the company" communicates acceptance or denial. Clarification is pending on whether this means BLUE BLAZE MHP LLC or Tenant Background Search. Do not assign this responsibility in public copy until clarified.
+- The September 10 decision recorded in `docs/OWNER-DECISIONS.md` confirms that BLUE BLAZE MHP LLC sends adverse-action notices. See `docs/FCRA-ADVERSE-ACTION.md` for the unfinished operational details.
 
 ## Account-specific facts still needed
 
 - The exact package/report categories Blue Blaze orders; the provider name alone does not identify a package.
 - How invitation contact details are collected after the initial in-person contact (the current website application does not collect email).
-- Whether reports are downloaded or printed, where those copies are stored, who can access them, and their retention/disposal practice. The owner specified indefinite retention for applications; this does not establish vendor/report-copy retention.
-- Who sends adverse-action notices and whether the vendor account provides the complete notice for the report used.
+- Report copies are downloaded or printed, as recorded in `docs/OWNER-DECISIONS.md`. Storage, access and disposal details remain owner-specific. Application retention was revised on September 11 to until the unit is filled; this does not establish vendor/report-copy retention.
+- Whether the vendor account provides a complete notice for the report used; Blue Blaze is responsible for sending it.
 
 ## Local implementation
 

@@ -1,0 +1,30 @@
+name: Project checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      TURSO_DATABASE_URL: file:/tmp/blue-blaze-ci.db
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm audit --audit-level=high
+      - name: Prepare disposable build database
+        run: |
+          touch /tmp/blue-blaze-ci.db
+          npx prisma db push
+      - run: npm run build

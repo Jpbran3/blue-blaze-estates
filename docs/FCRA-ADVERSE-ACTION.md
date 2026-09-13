@@ -382,17 +382,17 @@ followed.
 
 | | Rental applications (this website's database) | Consumer report copies |
 | --- | --- | --- |
-| Retention | Indefinite, by the owner's decision | **Not yet set — see below** |
+| Retention | Until the unit is filled; successful applications remain in the tenant file during tenancy, per the current policy | Until the tenant leaves for approved tenants; denied-applicant period remains unset |
 | Basis | Owner's business choice | FCRA secure-disposal duty applies |
 
-The owner's choice to retain *applications* indefinitely is the owner's call and is reflected
-in the privacy policy. **That decision does not extend to consumer reports.** Reports carry
+The application-retention decision was revised on September 11; see
+`OWNER-DECISIONS.md` and the current privacy policy. **That decision does not extend to consumer reports.** Reports carry
 their own FCRA disposal obligations, and the application retention policy must not be
 applied to them by default. Decide the report retention period separately and deliberately.
 
 Also: do not paste report contents into the application record in this website's database.
-That database is retained indefinitely and is not an appropriate home for consumer report
-data — doing so would silently merge the two rows of the table above.
+The application database does not implement a separate report-copy retention workflow;
+adding report data would silently merge the two rows of the table above.
 
 ### Fields to fill in once, then follow
 
@@ -444,7 +444,7 @@ Disposal trigger and practice
   opposite.
 - Omitting the 60-day free-report right or the dispute right.
 - Relying on the website privacy policy instead of an applicant-specific notice.
-- Keeping report copies indefinitely by default because applications are kept indefinitely.
+- Applying the application-retention policy to report copies by default.
 - Shredding the printout but leaving the downloaded PDF and the email attachment in place.
 - Handling the same facts inconsistently between applicants. Apply the same criteria to
   everyone; inconsistency is how a fair-housing claim starts.

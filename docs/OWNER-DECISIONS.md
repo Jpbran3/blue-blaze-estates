@@ -114,9 +114,6 @@ search traffic from people looking for that program by name.
   returned and used (score disclosures are required if so).
 - **Where report copies are stored, who can access them, and the disposal
   trigger.** Fill-once fields in `docs/FCRA-ADVERSE-ACTION.md`.
-- **Whether "the company" that communicates acceptance or denial** means
-  BLUE BLAZE MHP LLC or Tenant Background Search. This determines who is
-  operationally responsible for the adverse-action notice.
 - **Response-time claim.** "Within one business day" was softened to "as soon
   as we can" because it was unsubstantiated. Restore the specific wording only
   if the owner confirms they can meet it.

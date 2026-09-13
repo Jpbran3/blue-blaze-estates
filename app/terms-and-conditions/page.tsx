@@ -130,16 +130,15 @@ export default function TermsPage() {
       </p>
 
       <h2>Disputes</h2>
+      {/* [NEEDS ATTORNEY REVIEW — not yet drafted]
+          Owner elected to proceed without dispute-resolution clauses; see
+          docs/OWNER-DECISIONS.md. Keep drafting notes out of visitor-facing copy.
+          Do not add arbitration, class-action waivers or venue-selection terms
+          without a separately reviewed decision.
+      */}
       <p>
-        <em>
-          [NEEDS ATTORNEY REVIEW — not yet drafted] No dispute-resolution terms
-          are in effect. This section is reserved for language drafted by a
-          licensed Illinois attorney. Arbitration clauses, class-action waivers,
-          and venue-selection clauses are commonly placed here, but their
-          enforceability against housing applicants and tenants varies, and a
-          poorly drafted clause can be worse than none. Nothing in this section
-          limits any right or remedy you have under law.
-        </em>
+        No dispute-resolution terms are in effect. Nothing in this section
+        limits any right or remedy you have under law.
       </p>
 
       <h2>Changes</h2>

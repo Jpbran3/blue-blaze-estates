@@ -64,3 +64,6 @@ public/images/east-alton-mobile-homes.jpg
 /B7 Picture.png
 /C5 Picture.png
 /Screenshot 2026-06-11 113346.png
+
+# Safe setup template only; real environment files remain ignored.
+!/.env.example

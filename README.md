@@ -13,12 +13,34 @@ Built on the same platform as rjlurentals.com (Next.js + Prisma/Turso + Vercel).
 
 ## Local setup
 ```bash
-npm install
+npm ci
 cp .env.example .env.local   # fill in real values
-npx prisma migrate deploy
-npm run db:seed              # seeds Blue Blaze Mobile Home Park + a sample unit
 npm run dev                  # http://localhost:3000
 ```
+
+Use Node.js 22.12 or later in the Node 22 release line (CI uses Node 22).
+Next.js reads `.env.local`; standalone database scripts do not automatically
+read that file. Supply their environment explicitly. Never point local setup
+or seed commands at a production database.
+
+For a fresh, disposable local database:
+```bash
+touch /tmp/blue-blaze-local.db
+TURSO_DATABASE_URL=file:/tmp/blue-blaze-local.db npx prisma db push
+TURSO_DATABASE_URL=file:/tmp/blue-blaze-local.db TURSO_AUTH_TOKEN= npm run dev
+```
+
+The historical migrations do not reproduce the full current schema. Do not use
+`prisma migrate deploy` as the complete setup recipe or `db push` against an
+existing production database. The additive compliance preparation script is
+`npm run db:prepare-compliance`; production schema changes require a separately
+reviewed migration. Seeding is optional and writes sample records.
+
+## Verification
+
+`npm test`, `npm run lint`, `npm audit`, and `npm run build` check the project.
+GitHub Actions runs these checks for pull requests and pushes to `main`, using
+a disposable database and no production credentials.
 
 ## Environment variables (`.env.local`)
 | Key | Purpose |

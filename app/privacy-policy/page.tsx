@@ -205,8 +205,8 @@ export default function PrivacyPolicyPage() {
         When we receive a screening report about you, we may keep a downloaded or
         printed copy of it. Those copies are kept apart from the application
         itself and are disposed of securely — shredded on paper, and erased so
-        they cannot be recovered when held electronically. Our indefinite
-        retention of applications does not apply to these reports.
+        they cannot be recovered when held electronically. The application
+        retention period described above does not apply to these reports.
       </p>
 
       <h2>How we protect it</h2>

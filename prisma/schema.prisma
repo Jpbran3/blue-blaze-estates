@@ -44,7 +44,7 @@ model Application {
   townStateZip               String?
   phone                      String
   /// DEPRECATED — no longer collected or written. Retained so existing rows are
-  /// not destroyed by a migration. Purge with `npm run db:purge-ssn` once the
+  /// not destroyed by a migration. Purge with `npm run db:purge-sensitive` once the
   /// owner has confirmed, then drop the column in a follow-up migration.
   ssn                        String?
   /// DEPRECATED — no longer collected or written. Retained so existing rows are

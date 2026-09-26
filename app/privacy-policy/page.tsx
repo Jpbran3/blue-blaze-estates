@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function PrivacyPolicyPage() {
   return (
-    <LegalPage title="Privacy Policy" effectiveDate="September 10, 2026">
+    <LegalPage title="Privacy Policy" effectiveDate="September 26, 2026">
       <p>
         This policy explains what information Blue Blaze Estates, operated by
         BLUE BLAZE MHP LLC,
@@ -228,7 +228,7 @@ export default function PrivacyPolicyPage() {
         <li>Ask us to correct information that is wrong.</li>
         <li>Ask us to delete your application.</li>
         <li>
-          Ask for your application to be reviewed without the automated tool.
+          Ask us to set aside the automated summary and review your application manually.
         </li>
       </ul>
       <p>

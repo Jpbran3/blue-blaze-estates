@@ -21,15 +21,15 @@ const valid = { applicantName: "Synthetic Test", phone: "618-555-0100", electron
 test("application allowlist discards SSN/licence/child data and internal screening fields", () => {
   const result = parseApplication({ ...valid, ssn: "synthetic", spouseSsn: "synthetic", driversLicense: "synthetic", spouseDriversLicense: "synthetic", childrenResiding: "synthetic", aiScore: 10, status: "approved", archived: true, manualReviewRequested: true });
   for (const key of ["ssn", "spouseSsn", "driversLicense", "spouseDriversLicense", "childrenResiding", "aiScore", "status", "archived"]) assert.equal(key in result, false);
-  assert.equal(result.manualReviewRequested, true);
+  assert.equal("manualReviewRequested" in result, false);
   assert.equal(result.listingId, null);
 });
 
 test("reject malformed, oversized, missing required fields and unsafe coercions", () => {
-  for (const body of [{ ...valid, listingId: {} }, { ...valid, phone: [] }, { ...valid, applicantName: " " }, { ...valid, electronicSignature: "" }, { ...valid, employer: "x".repeat(2001) }, { ...valid, occupantCount: "-1" }, { ...valid, manualReviewRequested: "false" }]) {
+  for (const body of [{ ...valid, listingId: {} }, { ...valid, phone: [] }, { ...valid, applicantName: " " }, { ...valid, electronicSignature: "" }, { ...valid, employer: "x".repeat(2001) }, { ...valid, occupantCount: "-1" }]) {
     assert.throws(() => parseApplication(body), RequestError);
   }
-  assert.equal(parseApplication(valid).manualReviewRequested, false);
+  assert.equal("manualReviewRequested" in parseApplication({ ...valid, manualReviewRequested: "false" }), false);
 });
 
 test("JSON reader rejects arrays, null, invalid content types and malformed JSON", async () => {

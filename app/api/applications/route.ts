@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
   }
 
-  const { manualReviewRequested, listingId: rawListingId, ...fields } = input;
+  const { listingId: rawListingId, ...fields } = input;
 
   // Normalize listingId: the form sends "" when no unit is selected. An empty
   // string (or any id that doesn't match a real listing) would violate the
@@ -126,7 +126,6 @@ export async function POST(request: NextRequest) {
             ...fields,
             listingId,
             rentPrice,
-            manualReviewRequested,
             // ssn / spouseSsn / childrenResiding are intentionally never written.
             // The columns remain only so existing rows are not destroyed.
           },
@@ -141,28 +140,24 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // 2) Automated screening — skipped entirely when the applicant asked for a
-  //    human-only review. Nothing about their application is sent to the model.
-  if (!manualReviewRequested) {
-    try {
-      const result = await screenTenant(application, rentPrice);
-      if (result.score > 0) {
-        await withDbRetry(
-          () =>
-            prisma.application.update({
-              where: { id: application.id },
-              data: { aiScore: result.score, aiSummary: result.summary },
-            }),
-          "application screening update"
-        );
-      } else {
-        console.error("Screening returned an error score for application:", application.id);
-      }
-    } catch (err) {
-      // Screening is best-effort: a saved application must never be reported to
-      // the applicant as a failure because screening hiccuped.
-      logFailure("Screening/update failed (application still saved)", err);
+  // 2) Automated screening is best-effort; the application stays saved if it fails.
+  try {
+    const result = await screenTenant(application, rentPrice);
+    if (result.score > 0) {
+      await withDbRetry(
+        () =>
+          prisma.application.update({
+            where: { id: application.id },
+            data: { aiScore: result.score, aiSummary: result.summary },
+          }),
+        "application screening update"
+      );
+    } else {
+      console.error("Screening returned an error score for application:", application.id);
     }
+  } catch (err) {
+    // A saved application must never be reported as a failure because screening hiccuped.
+    logFailure("Screening/update failed (application still saved)", err);
   }
 
   // Minimal receipt. The applicant's browser has no need for the stored row or
@@ -172,7 +167,6 @@ export async function POST(request: NextRequest) {
     {
       id: application.id,
       received: true,
-      manualReviewRequested,
     },
     { status: 201 }
   );

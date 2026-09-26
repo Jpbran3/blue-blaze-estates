@@ -75,10 +75,8 @@ export default function PrivacyPolicyPage() {
       <h2>Automated review of applications</h2>
       <p>
         We use an automated tool to produce a preliminary score and written
-        summary of an application when you submit, unless you select
-        &ldquo;Review my application manually instead.&rdquo; Selecting that
-        option skips the automated tool entirely: none of your application
-        information is sent to it, and a person reviews your application.
+        summary when you submit an application. A person at Blue Blaze Estates
+        reviews every application and makes the final decision.
       </p>
       <p>
         <strong>Exactly what is sent to that tool:</strong> the monthly rent of
@@ -102,11 +100,10 @@ export default function PrivacyPolicyPage() {
           The score does not decide anything. A person at Blue Blaze Estates
           reviews every application and makes the final decision.
         </strong>{" "}
-        You may choose manual review before submitting. If a summary has already
-        been produced, you may also ask us to set it aside, assess your
+        You may ask us to set the automated summary aside, assess your
         application manually, and explain a decision. Contact us using the
-        details below and we will do so. Choosing manual review does not
-        disadvantage your application.
+        details below and we will do so. This request does not disadvantage
+        your application.
       </p>
       <p>
         To produce that summary, the information listed above — and only that

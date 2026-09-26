@@ -159,7 +159,6 @@ function ApplyForm() {
   const [cities, setCities] = useState<City[]>([]);
   const [listings, setListings] = useState<Listing[]>([]);
   const [selectedCitySlug, setSelectedCitySlug] = useState("");
-  const [manualReviewRequested, setManualReviewRequested] = useState(false);
   const errorSummaryRef = React.useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -213,7 +212,7 @@ function ApplyForm() {
       const res = await fetch("/api/applications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, signatureDate: today, manualReviewRequested }),
+        body: JSON.stringify({ ...form, signatureDate: today }),
       });
       if (!res.ok) throw new Error("Failed");
       setStatus("success");
@@ -706,7 +705,7 @@ function ApplyForm() {
             How your application is reviewed.
           </strong>{" "}
           Blue Blaze Estates uses an automated tool to produce a preliminary
-          score and summary unless you choose manual review below. It considers your employment,
+          score and summary. It considers your employment,
           income, rental history and your answer to the criminal-history
           question; it is not given your name, address, contact details, or who
           would live in the home. That score is only a starting point — a person
@@ -748,26 +747,6 @@ function ApplyForm() {
           </Link>{" "}
           for how we handle the information on this form.
         </p>
-
-        <div className="border-t border-gray-300 pt-3">
-          <label className="flex items-start gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={manualReviewRequested}
-              onChange={(e) => setManualReviewRequested(e.target.checked)}
-              className="mt-0.5 h-5 w-5 shrink-0 rounded border-gray-500 text-blue-900 focus:ring-2 focus:ring-blue-500"
-            />
-            <span>
-              <strong className="font-semibold">
-                Review my application manually instead.
-              </strong>{" "}
-              Tick this and we will not run the automated tool at all — none of
-              your information is sent to it, and a person reviews your
-              application from the start. This does not disadvantage your
-              application.
-            </span>
-          </label>
-        </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
         <Field

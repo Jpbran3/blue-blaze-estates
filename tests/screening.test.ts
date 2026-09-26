@@ -116,13 +116,17 @@ test("household composition carries no scoring weight in the prompt", () => {
   assert.match(prompt, /familial status/);
 });
 
-test("the submission route skips screening when manual review is requested", () => {
+test("new submissions always attempt screening without exposing the score", () => {
   const route = fs.readFileSync(
     path.join(process.cwd(), "app/api/applications/route.ts"),
     "utf8"
   );
-  assert.match(route, /if \(!manualReviewRequested\) \{/);
-  // and the receipt must not leak the internal assessment
+  const input = fs.readFileSync(
+    path.join(process.cwd(), "lib/applicationInput.ts"),
+    "utf8"
+  );
+  assert.match(route, /await screenTenant\(application, rentPrice\)/);
+  assert.equal(input.includes("manualReviewRequested"), false);
   assert.equal(/aiScore/.test(route.slice(route.indexOf("Minimal receipt"))), false);
 });
 

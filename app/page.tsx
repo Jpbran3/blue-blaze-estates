@@ -4,8 +4,31 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import HeroCarousel from "@/components/HeroCarousel";
 import Link from "next/link";
+import { SITE, pageMetadata } from "@/lib/site";
 
 export const revalidate = 60;
+
+export const metadata = pageMetadata({
+  title: "Blue Blaze Estates — Quality Rentals in Southern Illinois, Vouchers Welcome",
+  description: SITE.description,
+  path: "/",
+});
+
+// Structured data so search engines can show the business name, phone and
+// service area. No street address: the only confirmed address is a mailing
+// address in Springfield, which would misplace the business on a map.
+const businessJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  name: SITE.name,
+  url: SITE.url,
+  description: SITE.description,
+  telephone: `+1-${SITE.phone}`,
+  email: SITE.email,
+  logo: `${SITE.url}/logo.svg`,
+  image: `${SITE.url}/opengraph-image`,
+  areaServed: SITE.areaServed.map((name) => ({ "@type": "Place", name })),
+};
 
 async function getCities() {
   try {
@@ -38,6 +61,12 @@ export default async function HomePage() {
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(businessJsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
       <Header />
 
       <main id="main-content" tabIndex={-1} className="focus:outline-none">
@@ -67,7 +96,7 @@ export default async function HomePage() {
                 />
               ),
               title: "Fair Pricing",
-              desc: "Transparent, competitive rents and a free application",
+              desc: "Transparent rents. Free to apply — a $41 background check applies only if we move forward.",
             },
             {
               icon: (

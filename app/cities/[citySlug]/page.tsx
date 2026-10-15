@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import ListingCard from "@/components/ListingCard";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { pageMetadata } from "@/lib/site";
 
 export const revalidate = 60;
 
@@ -38,10 +39,11 @@ export async function generateMetadata({ params }: Props) {
     console.error("generateMetadata city lookup failed:", err);
   }
   if (!city) return { title: "City Not Found" };
-  return {
+  return pageMetadata({
     title: `${city.name} — Blue Blaze Estates`,
-    description: `Browse available rental properties — ${city.name}.`,
-  };
+    description: `Browse available rentals at ${city.name}. Housing vouchers and rental assistance welcome. Apply online.`,
+    path: `/cities/${city.slug}`,
+  });
 }
 
 export default async function CityPage({ params }: Props) {
@@ -55,7 +57,7 @@ export default async function CityPage({ params }: Props) {
       <Header />
       <main id="main-content" tabIndex={-1} className="max-w-6xl mx-auto px-6 py-12 focus:outline-none">
         {/* Breadcrumb */}
-        <nav className="text-sm text-gray-500 mb-6">
+        <nav aria-label="Breadcrumb" className="text-sm text-gray-500 mb-6">
           <Link href="/" className="hover:text-gray-800">
             Home
           </Link>

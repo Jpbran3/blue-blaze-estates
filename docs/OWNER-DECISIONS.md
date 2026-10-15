@@ -114,6 +114,16 @@ search traffic from people looking for that program by name.
   returned and used (score disclosures are required if so).
 - **Where report copies are stored, who can access them, and the disposal
   trigger.** Fill-once fields in `docs/FCRA-ADVERSE-ACTION.md`.
+- **Homepage photo licensing — found 2026-10-15.** `public/images/park-1.jpg`
+  still shows the Google Maps mini-map overlay in its bottom-left corner, so it
+  is a cropped Google Street View capture; `park-2.jpg` and `park-3.jpg` look
+  the same. Street View imagery belongs to Google and its terms do not permit
+  reuse as marketing photos, yet `/terms-and-conditions` describes the site's
+  photographs as originals. Separately, `blue-blaze-mobile-home-park.jpg` (the
+  property card) is a drone shot of new homes among tall pines and fire-damaged
+  trees, which does not obviously match Herrin. Replace all four with photos the
+  owner took of the actual park (a phone is fine), or confirm their source. The
+  link-preview image deliberately uses no photo until this is settled.
 - **Response-time claim.** "Within one business day" was softened to "as soon
   as we can" because it was unsubstantiated. Restore the specific wording only
   if the owner confirms they can meet it.

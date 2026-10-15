@@ -61,6 +61,9 @@ a disposable database and no production credentials.
 - `app/privacy-policy`, `app/terms-and-conditions`, `app/accessibility` — legal pages (linked from the footer)
 - `lib/adminAuth.ts` — shared admin auth; fails closed when `ADMIN_PASSWORD` is unset
 - `next.config.ts` — security headers (CSP, X-Frame-Options, Referrer-Policy, …)
+- `lib/site.ts` — public site facts (URL, phone, service area) for search and link previews
+- `app/sitemap.ts`, `app/robots.ts`, `app/opengraph-image.tsx` — sitemap, crawler rules, link-preview card
+- `app/not-found.tsx`, `app/error.tsx` — branded 404 and error pages
 
 ## Compliance notes
 - **SSNs and driver's licence numbers are not collected.** The `ssn`, `spouseSsn`, `driversLicense` and `spouseDriversLicense` columns are retained for legacy rows only — never write to them.

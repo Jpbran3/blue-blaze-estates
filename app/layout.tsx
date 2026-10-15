@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
+import { SITE } from "@/lib/site";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -15,10 +16,15 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE.url),
   title:
     "Blue Blaze Estates — Quality Rentals in Southern Illinois, Vouchers Welcome",
-  description:
-    "Quality rentals in Herrin and the Southern Illinois area, with a focus on quiet living. Housing vouchers and rental assistance are welcome. Now leasing at Blue Blaze Mobile Home Park in Herrin, IL.",
+  description: SITE.description,
+  // Defaults for link previews. Titles and descriptions are left to each page
+  // (see pageMetadata) so a shared link never previews with the wrong page's
+  // wording; the image comes from app/opengraph-image.tsx.
+  openGraph: { type: "website", siteName: SITE.name, locale: "en_US" },
+  twitter: { card: "summary_large_image" },
   icons: {
     icon: [
       { url: "/logo.svg", type: "image/svg+xml" },

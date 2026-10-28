@@ -155,6 +155,7 @@ function ApplyForm() {
   const [form, setForm] = useState({ ...EMPTY_FORM });
   const [errors, setErrors] = useState<Partial<Record<FormKey, string>>>({});
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [submitError, setSubmitError] = useState("");
   const [spouseOpen, setSpouseOpen] = useState(false);
   const [cities, setCities] = useState<City[]>([]);
   const [listings, setListings] = useState<Listing[]>([]);
@@ -207,6 +208,7 @@ function ApplyForm() {
       return;
     }
     setErrors({});
+    setSubmitError("");
     setStatus("submitting");
     try {
       const res = await fetch("/api/applications", {
@@ -214,6 +216,13 @@ function ApplyForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...form, signatureDate: today }),
       });
+      if (res.status === 429) {
+        // Rate limited: an immediate retry fails again, so show the server's message.
+        const data = await res.json().catch(() => null);
+        setSubmitError(data?.error || "Too many submissions. Please call us directly.");
+        setStatus("error");
+        return;
+      }
       if (!res.ok) throw new Error("Failed");
       setStatus("success");
     } catch {
@@ -775,7 +784,7 @@ function ApplyForm() {
 
       {status === "error" && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm mt-4">
-          Something went wrong. Please try again or call us directly.
+          {submitError || "Something went wrong. Please try again or call us directly."}
         </div>
       )}
 

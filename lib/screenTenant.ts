@@ -1,4 +1,7 @@
+// Holds ANTHROPIC_API_KEY: a client-component import must fail the build.
+import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
+import { claimScreeningSlot } from "./screeningLimits";
 
 export interface ApplicationData {
   id?: string;
@@ -175,6 +178,11 @@ export async function screenTenant(
     return { score: 0, summary: "Screening error — please review manually." };
   }
 
+  if (!(await claimScreeningSlot())) {
+    console.warn("Daily screening cap reached; application left for manual review.");
+    return { score: 0, summary: "Screening skipped — daily limit reached; please review manually." };
+  }
+
   const client = new Anthropic({ apiKey });
 
   try {
@@ -189,6 +197,16 @@ export async function screenTenant(
         },
       ],
     });
+
+    // Spend trail only: ids and token counts, never applicant data.
+    console.info(JSON.stringify({
+      event: "anthropic_usage",
+      applicationId: application.id ?? null,
+      model: message.model,
+      inputTokens: message.usage.input_tokens,
+      outputTokens: message.usage.output_tokens,
+      at: new Date().toISOString(),
+    }));
 
     // Do NOT log `raw` — the summary contains the applicant's income figures
     // and other personal data, which would land in Vercel's runtime logs.

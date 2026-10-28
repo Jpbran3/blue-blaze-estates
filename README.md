@@ -50,6 +50,11 @@ a disposable database and no production credentials.
 | `ANTHROPIC_API_KEY` | AI tenant screening |
 | `BLOB_READ_WRITE_TOKEN` | Vercel Blob image uploads |
 | `ADMIN_PASSWORD` | Admin dashboard login |
+| `SCREENING_DAILY_CAP` | Optional, default 200: site-wide paid screening calls per day; over the cap, applications save unscored for manual review |
+| `APPLICATION_SUBMIT_LIMIT_PER_HOUR` | Optional, default 10: public application submissions per client IP per hour |
+
+Each screening call logs an `anthropic_usage` line (application id, model, token
+counts; no applicant data) to the Vercel runtime logs.
 
 ## Key paths
 - `app/page.tsx` — homepage (hero, property groups, CTA)

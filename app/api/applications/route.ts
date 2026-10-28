@@ -5,6 +5,7 @@ import { isAuthenticated } from "@/lib/adminAuth";
 import { readJsonObject, RequestError } from "@/lib/requestBody";
 import { parseApplication } from "@/lib/applicationInput";
 import { rateLimit } from "@/lib/rateLimit";
+import { submitLimitPerHour } from "@/lib/screeningLimits";
 
 export const maxDuration = 60;
 
@@ -58,10 +59,10 @@ export async function POST(request: NextRequest) {
   // Throttle before touching the body: submissions are unauthenticated and
   // write to the database, so this is the spam and abuse boundary.
   try {
-    // 10/hour, not 5: the counter increments on every attempt including
+    // 10/hour by default, not 5: the counter increments on every attempt including
     // validation failures, and a real applicant filling in a long form can
     // legitimately retry several times. Still far below any useful spam rate.
-    const limit = await rateLimit(request, "application", 10, 3600);
+    const limit = await rateLimit(request, "application", submitLimitPerHour(), 3600);
     if (!limit.allowed) {
       return NextResponse.json(
         { error: "Too many applications submitted. Please try again later." },

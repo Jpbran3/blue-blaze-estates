@@ -1,14 +1,19 @@
 import { createHash } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 
-/** Atomic database counter shared by all server instances; stores no raw IP. */
+/** Per-client limit; stores no raw IP. */
 export async function rateLimit(request: Request, scope: string, limit: number, windowSeconds: number) {
   // Vercel overwrites this header at its edge. Do not trust a caller's X-Forwarded-For.
   const ip = process.env.VERCEL === "1"
     ? request.headers.get("x-vercel-forwarded-for")?.split(",")[0].trim() || "unknown"
     : "local";
+  return countAttempt(`${scope}:${ip}`, limit, windowSeconds);
+}
+
+/** Atomic database counter shared by all server instances; stores only a digest of the name. */
+export async function countAttempt(name: string, limit: number, windowSeconds: number) {
   const now = Date.now();
-  const key = createHash("sha256").update(`${scope}:${ip}`).digest("hex");
+  const key = createHash("sha256").update(name).digest("hex");
   const resetAt = now + windowSeconds * 1000;
   const rows = await prisma.$queryRaw<Array<{ attempts: number; resetAt: bigint | number }>>`
     INSERT INTO "RateLimit" ("key", "attempts", "resetAt") VALUES (${key}, 1, ${resetAt})

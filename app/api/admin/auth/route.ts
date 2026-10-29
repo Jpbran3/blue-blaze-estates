@@ -6,8 +6,15 @@ import {
   sessionValue,
   verifyPassword,
 } from "@/lib/adminAuth";
-import { rateLimit } from "@/lib/rateLimit";
+import { clearAttempts, rateLimit } from "@/lib/rateLimit";
 import { readJsonObject, RequestError } from "@/lib/requestBody";
+
+// Five wrong passwords from one client lock sign-in for the rest of the
+// 15-minute window. Every attempt is counted before the password is checked, so
+// parallel requests cannot slip extra guesses past the limit; a correct password
+// clears the count, so only wrong ones add up.
+const LOGIN_ATTEMPTS = 5;
+const LOGIN_WINDOW_SECONDS = 900;
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
@@ -28,7 +35,7 @@ export async function POST(request: NextRequest) {
   // Throttle login attempts. Without this the admin password — the only thing
   // protecting every applicant's record — can be guessed at network speed.
   try {
-    const limit = await rateLimit(request, "admin-login", 10, 900);
+    const limit = await rateLimit(request, "admin-login", LOGIN_ATTEMPTS, LOGIN_WINDOW_SECONDS);
     if (!limit.allowed) {
       return NextResponse.json(
         { error: "Too many attempts. Please try again later." },
@@ -62,6 +69,9 @@ export async function POST(request: NextRequest) {
   if (!value) {
     return NextResponse.json({ error: "Invalid password" }, { status: 401 });
   }
+
+  // Best effort: a count left behind only leaves fewer spare attempts until the window resets.
+  await clearAttempts(request, "admin-login").catch(() => console.error("Unable to reset admin login attempts"));
 
   const response = NextResponse.json({ ok: true });
   response.cookies.set(ADMIN_SESSION_COOKIE, value, {
